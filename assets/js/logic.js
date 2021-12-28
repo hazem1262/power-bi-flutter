@@ -87,9 +87,20 @@ function embedPowerBIReport() {
             log += "\n" + pages[i].name + " - " + pages[i].displayName;
             log += "\n" + "Page Visuals:";
             let visuals = await pages[i].getVisuals();
-            visuals.forEach(function (visual) {
-                log += "\n" + visual.name + " - " + visual.title;
-            });
+            for (var j = 0; j< visuals.length; j++) {
+                log += "\n" + visuals[j].name + " - " + visuals[j].title;
+                try {
+                    let result = await visuals[j].exportData(models.ExportDataType.Summarized, 2);
+                    log += "\n" + "Visual data:";
+                    log += "\n" + result.data;
+                } catch (e) {
+                    DebugChannel.postMessage("catch error");
+                    DebugChannel.postMessage(e);
+                }
+
+//
+//
+            }
         }
 
         DebugChannel.postMessage(log);
