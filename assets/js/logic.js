@@ -32,7 +32,7 @@ function embedPowerBIReport() {
     +-----------------------------------------------------------------------------------*/
     // Read embed application token
 //    let accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1yNS1BVWliZkJpaTdOZDFqQmViYXhib1hXMCIsImtpZCI6Ik1yNS1BVWliZkJpaTdOZDFqQmViYXhib1hXMCJ9.eyJhdWQiOiJodHRwczovL2FuYWx5c2lzLndpbmRvd3MubmV0L3Bvd2VyYmkvYXBpIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvOGQzNWJhMjEtNGJhNy00YTQ1LWFjYTAtMmU0OTA5MmQ1NTE4LyIsImlhdCI6MTY0MDY3NTk3NiwibmJmIjoxNjQwNjc1OTc2LCJleHAiOjE2NDA2Nzk5NTQsImFjY3QiOjAsImFjciI6IjEiLCJhaW8iOiJFMlpnWVBDTzJWODMyeTlKOGFQVzgyVXplVnVtUlMvSm02alpLWEg4YWw1VjBVNk5uRllBIiwiYW1yIjpbInB3ZCJdLCJhcHBpZCI6IjYyNmZhZjc3LWYzNTYtNGI2ZS1iZWZiLWJmYTNkNDg5NGVmYSIsImFwcGlkYWNyIjoiMCIsImZhbWlseV9uYW1lIjoiSGF6ZW0iLCJnaXZlbl9uYW1lIjoiQXNocmFmIiwiaXBhZGRyIjoiMTA1LjE5Ni4xOTUuMTI1IiwibmFtZSI6IkFzaHJhZiBIYXplbSIsIm9pZCI6IjgxNzYzZTM5LThjYjMtNGUwMi1hNGRiLTZiYmE4MzAwZWM0NSIsInB1aWQiOiIxMDAzMjAwMEM1RjQyQzc0IiwicmgiOiIwLkFUQUFJYm8xamFkTFJVcXNvQzVKQ1MxVkdIZXZiMkpXODI1THZ2dV9vOVNKVHZvd0FBcy4iLCJzY3AiOiJBcHAuUmVhZC5BbGwgQ2FwYWNpdHkuUmVhZC5BbGwgQ2FwYWNpdHkuUmVhZFdyaXRlLkFsbCBDb250ZW50LkNyZWF0ZSBEYXNoYm9hcmQuUmVhZC5BbGwgRGFzaGJvYXJkLlJlYWRXcml0ZS5BbGwgRGF0YWZsb3cuUmVhZC5BbGwgRGF0YWZsb3cuUmVhZFdyaXRlLkFsbCBEYXRhc2V0LlJlYWQuQWxsIERhdGFzZXQuUmVhZFdyaXRlLkFsbCBHYXRld2F5LlJlYWQuQWxsIEdhdGV3YXkuUmVhZFdyaXRlLkFsbCBSZXBvcnQuUmVhZC5BbGwgUmVwb3J0LlJlYWRXcml0ZS5BbGwgU3RvcmFnZUFjY291bnQuUmVhZC5BbGwgU3RvcmFnZUFjY291bnQuUmVhZFdyaXRlLkFsbCBXb3Jrc3BhY2UuUmVhZC5BbGwgV29ya3NwYWNlLlJlYWRXcml0ZS5BbGwiLCJzdWIiOiJRSUJ5bmdfNHZBZ0dESlJYZUVXQ3BHbGdfXzZIdHlCeDRSUkdhWGJoWU1nIiwidGlkIjoiOGQzNWJhMjEtNGJhNy00YTQ1LWFjYTAtMmU0OTA5MmQ1NTE4IiwidW5pcXVlX25hbWUiOiJhLmhhemVtQG5vdXNkaWdpdGFsLm5ldCIsInVwbiI6ImEuaGF6ZW1Abm91c2RpZ2l0YWwubmV0IiwidXRpIjoib3lTRkRBZUVEVS1xUnkyYTctaFlBQSIsInZlciI6IjEuMCIsIndpZHMiOlsiYjc5ZmJmNGQtM2VmOS00Njg5LTgxNDMtNzZiMTk0ZTg1NTA5Il19.It6tzQ4TPr6tgCnNAPhfLa19pFDSNeC5USOWk00pRhujua8alEHD5sTLNL-oHWTAGpmMYJ780Ov5ydAC-KhJhPHduT_yyvkJVG-YxPY83GmIsao7IXReQpueD62xcqE8Uo6QxT0paCYFge87_Ji-b20ZD4lO1F8Ngbz2d0CP8RRV1XR6feaF_dnVlXedmIPr8h-R6liEVENdKGFJEdB9IxV2j8AjBgxez46OmgaSQjKyRAcGy9IfUeNtnE2OvjrSXELaTacRl9BPI_9eZUheqUTvfJzflU04BApzO8-a1oCJ8HGYz7zmwg8my-abqPJkdu7pNG1FINFlq50G3GE5SQ";
-    let accessToken = "H4sIAAAAAAAEACWUt66EVgAF_-W1WCKzYMnFkllyuoSOnHNasPzvfpb7qUZnzt8_VnL3U5L__PmDVuQ8ak5qp4hM6zLVPrvs-Ea5bBSauId1ezRu-UhhHWljOd7LpE0dukpWTLrpo-2aliBfL8wayg4Sk_dPJQQ5aTI-I26DVquoQV-0e4SRnefSRd-N90k1OfVOGOiAZicVZ2AZr90v1eDPqYuOuxDThgparIJMQGy9ggIsgKcCXjLujM5teekwK7-xWIEELi2tlmMmSh6ZCvali3r8c4sMaLknV7DAcdfKPNuj7p6WCeJSbhiKKxmokkObMVCZdOoFAb7qyi544vcb6DPB2E45UZCWlm6ab6gJMQ_7nW7xraXk68ULBpsEk_aSJL85SVf9Hl1mWdw3MOPLRS_0RHsDl6I7D6MJ8nbYaAIBCDV1gZpIEmaX70P4Kp4u0z4VHlpmrpIhtE_dlt0tajCe9FFSFgqfW9Q3lTgniT0616aK1JRXZrE6XwnhZ4j0oM5MnuDGgiOZubHz2bGl9uYGLmwSItY2JWrxejRCoTjI9jhJfXjYOt5bVI9YVliueiouye4-0wVTUw0CxdsWFdu6tK4wTaOCG4BxphskYYLNyae4zjP1WknulsZNrFzZgHEHJtrBqV8w8lDIoWJUtMipI_ZXTCmwjX91enDv5YULa_XtdqGYSZ0l7_JjalnM-XwviEWg5zUhifcdfoRXgQGykDbROVPdT-Ad46gPhq0QnVDOjIVLtLIiTDJlz6_uuget4h28VTlXGqu0Zidzu2H6pxxYSVVW-4PkHxlVC2nw8nFYQ8l1Z5SFRjP0PQwordILBERmz-Vu_bgAuk4dxGc7wd_FBpW0K6mRGTP1QRTOrOnURcLKqY6sGk9YpRSRZyF2uXTV-P3zxw-33vM-qcX9m5N_nLf_etTY6V1AgIsLrcNiA2tOD7sPkWqHgXCBZHrFTUASW-RWJDUNWjELZAnWxjxg9pTxcQQOKAKA1sZ8QRwh3IYgJluoNLdRYx0m9bTDo0VB0MmrXkZ5i7SKuUbGfok-twr203NMPIXiJTRUUYiBWJR-xcD9gJXWNiyuoJbVKe5bHDnPsDULdfTxlqLQzgRgx6qj3eFi3kwyy04OQNZK11FKdUtzJppFZG-6elryK57vLo59nmV_X-JsOI5aWuvLuUm_XhaxWM_VxxCWv0t5JFKvuCJPv6HNioRgsHUVnw8EE0L2e9oDzxkkf7awwDUfF6IbsJQ04uKrvxQwrmzm9ddf_2m-57pYFfBr-Unwq_XrtUlIBrtBxzAdxP1PuU01JvuxFr_YYWebXHiAPYiOjSziKGueYRGY5DwqyBL-xXmVYtpNrGX1S8a7XhXVaftWEd9TDxnLVdOvHblzt3lKLfgSp8TX-ernVcPMqzRzh2xCHj8pasSJSoCsZSjTn3HRx6P_5nsgfudkbdVz9Rslyge9ZQjVRO2Q1cIYIx-Ls3a45VOYxwxVmvZxvxPTW8EtW03StJ1qiC0TeW9uxhocyZkIVftxV7mMlORAG-k3Ttwai1lTNX-41mHfsCWNyu9K-PRuhpZloTQRXGpUbYyij3Db6kNNpkjFg-mOPttNy6mJavf4QUL4AxvMTNqlxavlau_UELWh-Zib0GxQt6xSLoEzXMXR3f3_NP_zLyQLiPdCBgAA.eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly9XQUJJLVdFU1QtRVVST1BFLUItUFJJTUFSWS1yZWRpcmVjdC5hbmFseXNpcy53aW5kb3dzLm5ldCIsImVtYmVkRmVhdHVyZXMiOnsibW9kZXJuRW1iZWQiOmZhbHNlfX0=";
+    let accessToken = "H4sIAAAAAAAEAB2Tt66sWgIF_-WkjIR3I92AxntoYGMybOOh8fD0_n3OnXxFtar--XHSu5_S4ue_P8W4frM6OSmtn-OAw5ogGft9c7veww8J4gi-vo7YgUW6u0uiboA-FryNRlSPhXUEw2hEzAcVlJqgix-MGjIog1DMGZ8blQ8sA0mKdUJ-Zldmoq91OzXSGEvLlmtX81UObgoy__SorfA4d2duxLaOAqK45l7YUNjwOyIolXKFpYIMGjMYEvcmj3FoYpsQ_MTIMpW8yd5sguaQbO3Xz3LP8Zdf7AI8nVgoCsFYHfsYZFzb-xHh7_6m8MLqNizRqBdR-MNsdQPqOUFlpUSRxCkr8yzreumNJF4CgsSoZGKDe77zBWE_TOulbKseuO-Vg_v481p8jIl6TLjRQdmloLQE-iPWqyKerE-O33k-TTEJDvGTaZodPPTNVy7VmfOgByE3JxOgP4UlfpD5oPNLL0tNz74sS_D0HeStP8O7XqNS8831mfECbNmVGkukOxd4VdNJn1NCgaFjHw4dPHnFkSg4OfN1X-AoQax7A1V4GdhL1xZut9OIQB_PpasGH1mWmrUW4YwbT4inYzkPZNNVHRJC1_6kTKTXPdk4eFVvqw3ZQwXb-aGW9251Zc-jSMv1IMUsznHKbKoheFhKNtiBhGWYanp0X0s5Phdf1UsWdVq90ApJCMqcxHriL7TYIPCTLZi_0VKecC-_Tk0JgIuOZ-RzoXTf5lRVCi_K5OpMmD4bep7ryDFs1PvbJ3KmJt7YE-abRMEhW_IRHSDHxvJrTK_AYjVIGfDVWuqdo9Ql5AaNzvnU1jyEFKFE47pIXODgXKkELU3Wbqad4rCTXlqN9q0q-IBJ517PoBMM9uFuM-1mC46ZWP2GXhBi_s1uRNpe2hgfdFPy489_fvhf6bZJL-_fnJR8n-1Dmd_s5hjS7EmY9QUAlA80adVYiE2sd9Q5OkHyQCOeScLD9vM1Wiewn1xTee-tZx6a8ROTYI3_CGI3WsF16f12RspbkvzuAdHD9LWsnR7wxx1d39-d5Ysk1IlEr3nk8zqvdjjLMLbuK4Lv4zWrA5AmsGHDozHzSR4wSsS0oV2lZSk6joGk-BDtSgrvAS8v-bnaa48L1tg0_9nWAGkMukPakIp5J3_fT82SD7g5t4E8mzEY02xpRPLdc-AC-PVldQDhhcE754VZ1EePTLryErrc0CnGXo9OKDLWelMD7_AAINEgjm4Bv03TZAXrEwS5DLaKC7oUbvsapeRSvxJy_vnzF_M91-Wigl_KbfhX2fA6VL6wnHfh-rB9c_9fec1nTLd9KX9nttXz0SB3qeEVHsO9uoxh506_0NJumYgwJIBj5tNndf9g5oKnCuMTXcWOQSh3spOY8RTcqy82pXHQSFnFyR6ZZNOQwdxGafCbU48MQP3wITcpEgNvN-kDqUAukz8HKVprNQfjF3Zpt6KEaLoYzjexfGs1m9EIPBX6JNA6GjYVUDirTLYaVfMSX2ucLgF0EhjFW1IKcYztkAR5IN1jhwIhIac9FTNAkEJPEghhs8reKQHP2-DATyNJDHbN8_t2_C_xidi0Uur7kAlOIe4neA8dCmLmJpR1movI3uO6m1rNidpjh9FqOw2en12X6SJ9JEed8eIUIuvgkZrdJDwIb0BA_z3j3_8BL-6PU0IGAAA=.eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly9XQUJJLVdFU1QtRVVST1BFLUItUFJJTUFSWS1yZWRpcmVjdC5hbmFseXNpcy53aW5kb3dzLm5ldCIsImVtYmVkRmVhdHVyZXMiOnsibW9kZXJuRW1iZWQiOmZhbHNlfX0=";
 
     // Read embed URL
 //    let embedUrl = "https://app.powerbi.com/reportEmbed?reportId=f48b9c40-cf4c-4e5d-9ec5-8c1a530c2c1b&autoAuth=true&ctid=8d35ba21-4ba7-4a45-aca0-2e49092d5518&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly93YWJpLXdlc3QtZXVyb3BlLWUtcHJpbWFyeS1yZWRpcmVjdC5hbmFseXNpcy53aW5kb3dzLm5ldC8ifQ%3D%3D";
@@ -138,19 +138,82 @@ async function getVisualsData(pageName, visualName) {
     DebugChannel.postMessage("Page Name: " + pageName);
     DebugChannel.postMessage("Page Visual: " + visualName);
     let page = await report.getPageByName(pageName);
+    let reportFilers = await report.getFilters();
+    DebugChannel.postMessage(JSON.stringify(reportFilers));
     let visual = await page.getVisualByName(visualName);
     let results = await visual.exportData(models.ExportDataType.Summarized, 100);
+    let pageFilers = await page.getFilters();
+    DebugChannel.postMessage(JSON.stringify(pageFilers));
+    let visualFilers = await visual.getFilters();
+    DebugChannel.postMessage(JSON.stringify(visualFilers));
+
     DebugChannel.postMessage("results done");
     VisualDataChannel.postMessage(JSON.stringify(results));
+    let advancedTeamFilter = {
+      $schema: "http://powerbi.com/product/schema#advanced",
+      target: {
+        table: "Team (Current)",
+        column: "CrewName"
+      },
+      logicalOperator: "Is",
+      conditions: [
+        {
+          operator: "Contains",
+          value: "Finishing - TEAM"
+        }
+      ],
+      filterType: models.FilterType.AdvancedFilter
+    }
+    let advancedDateFilter = {
+      $schema: "http://powerbi.com/product/schema#advanced",
+      target: {
+        table: "Date Shift",
+        column: "Date Shift"
+      },
+      logicalOperator: "Is",
+      conditions: [
+        {
+          operator: "Contains",
+          value: "2021-12-28 00:00:00"
+        }
+      ],
+      filterType: models.FilterType.AdvancedFilter
+    }
+    let filter = {
+        "$schema":"http://powerbi.com/product/schema#basic",
+        "target": {
+            "table":"Team (Current)",
+            "column":"CrewName"
+        },
+        "filterType":1,
+        "displaySettings": {
+            "isHiddenInViewMode":false
+        },
+        "operator":"All",
+        "values":["Finishing - TEAM"],
+        "requireSingleSelection":false
+    }
+    report.getFilters().then(function (allTargetFilters) {
+        allTargetFilters.push(filter);
+        allTargetFilters.push(advancedTeamFilter);
+        allTargetFilters.push(advancedDateFilter);
+
+        // Set filters
+        // https://microsoft.github.io/PowerBI-JavaScript/interfaces/_src_ifilterable_.ifilterable.html#setfilters
+        report.setFilters(allTargetFilters);
+    });
+//    await report.updateFilters(models.FiltersOperations.ReplaceAll, [filter])
 }
 
+function addFilter() {
 
+}
 /*
 report.setVisualDisplayState -> will be used to show / hide an visual
-*/
 
 /*
 Report Docs -> https://docs.microsoft.com/en-us/javascript/api/powerbi/powerbi-client/report.report
 Page Docs -> https://docs.microsoft.com/en-us/javascript/api/powerbi/powerbi-client/page.page
-Visual Docs -> https://docs.microsoft.com/en-us/javascript/api/powerbi/powerbi-client/visual
+Visual Docs -> https://docs.microsoft.com/en-us/javascript/api/powerbi/powerbi-client/visual.visual
+update filter docs -> https://docs.microsoft.com/en-us/javascript/api/overview/powerbi/control-report-filters#basic-filter
 */
