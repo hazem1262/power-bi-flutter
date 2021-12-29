@@ -1,12 +1,7 @@
 // powerbi-client v2.18.7
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-/*function testCommunications(){
-     if(DebugChannel !== undefined) {
-                 DebugChannel.postMessage("test channel communication");
-                 embedPowerBIReport()
-             }
- }*/
+
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();

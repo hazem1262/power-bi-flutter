@@ -1,5 +1,5 @@
 abstract class IJavascriptHandler {
   String getTestCommunications();
-  getInitWebViewDimensionsFunction(double height);
-
+  String getInitWebViewDimensionsFunction(double height);
+  String getVisualsData(String pageName, String visualName);
 }

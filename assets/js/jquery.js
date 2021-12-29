@@ -11,12 +11,6 @@
  *
  * Date: 2021-03-02T17:08Z
  */
- /*function testCommunications(){
-     if(DebugChannel !== undefined) {
-                 DebugChannel.postMessage("test channel communication");
-                 embedPowerBIReport()
-             }
- }*/
 ( function( global, factory ) {
 
 	"use strict";

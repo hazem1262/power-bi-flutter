@@ -15,7 +15,8 @@ function testCommunications(){
 
 let loadedResolve, reportLoaded = new Promise((res, rej) => { loadedResolve = res; });
 let renderedResolve, reportRendered = new Promise((res, rej) => { renderedResolve = res; });
-
+let report;
+let pages;
 // Get models. models contains enums that can be used.
 models = window['powerbi-client'].models;
 
@@ -31,7 +32,7 @@ function embedPowerBIReport() {
     +-----------------------------------------------------------------------------------*/
     // Read embed application token
 //    let accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1yNS1BVWliZkJpaTdOZDFqQmViYXhib1hXMCIsImtpZCI6Ik1yNS1BVWliZkJpaTdOZDFqQmViYXhib1hXMCJ9.eyJhdWQiOiJodHRwczovL2FuYWx5c2lzLndpbmRvd3MubmV0L3Bvd2VyYmkvYXBpIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvOGQzNWJhMjEtNGJhNy00YTQ1LWFjYTAtMmU0OTA5MmQ1NTE4LyIsImlhdCI6MTY0MDY3NTk3NiwibmJmIjoxNjQwNjc1OTc2LCJleHAiOjE2NDA2Nzk5NTQsImFjY3QiOjAsImFjciI6IjEiLCJhaW8iOiJFMlpnWVBDTzJWODMyeTlKOGFQVzgyVXplVnVtUlMvSm02alpLWEg4YWw1VjBVNk5uRllBIiwiYW1yIjpbInB3ZCJdLCJhcHBpZCI6IjYyNmZhZjc3LWYzNTYtNGI2ZS1iZWZiLWJmYTNkNDg5NGVmYSIsImFwcGlkYWNyIjoiMCIsImZhbWlseV9uYW1lIjoiSGF6ZW0iLCJnaXZlbl9uYW1lIjoiQXNocmFmIiwiaXBhZGRyIjoiMTA1LjE5Ni4xOTUuMTI1IiwibmFtZSI6IkFzaHJhZiBIYXplbSIsIm9pZCI6IjgxNzYzZTM5LThjYjMtNGUwMi1hNGRiLTZiYmE4MzAwZWM0NSIsInB1aWQiOiIxMDAzMjAwMEM1RjQyQzc0IiwicmgiOiIwLkFUQUFJYm8xamFkTFJVcXNvQzVKQ1MxVkdIZXZiMkpXODI1THZ2dV9vOVNKVHZvd0FBcy4iLCJzY3AiOiJBcHAuUmVhZC5BbGwgQ2FwYWNpdHkuUmVhZC5BbGwgQ2FwYWNpdHkuUmVhZFdyaXRlLkFsbCBDb250ZW50LkNyZWF0ZSBEYXNoYm9hcmQuUmVhZC5BbGwgRGFzaGJvYXJkLlJlYWRXcml0ZS5BbGwgRGF0YWZsb3cuUmVhZC5BbGwgRGF0YWZsb3cuUmVhZFdyaXRlLkFsbCBEYXRhc2V0LlJlYWQuQWxsIERhdGFzZXQuUmVhZFdyaXRlLkFsbCBHYXRld2F5LlJlYWQuQWxsIEdhdGV3YXkuUmVhZFdyaXRlLkFsbCBSZXBvcnQuUmVhZC5BbGwgUmVwb3J0LlJlYWRXcml0ZS5BbGwgU3RvcmFnZUFjY291bnQuUmVhZC5BbGwgU3RvcmFnZUFjY291bnQuUmVhZFdyaXRlLkFsbCBXb3Jrc3BhY2UuUmVhZC5BbGwgV29ya3NwYWNlLlJlYWRXcml0ZS5BbGwiLCJzdWIiOiJRSUJ5bmdfNHZBZ0dESlJYZUVXQ3BHbGdfXzZIdHlCeDRSUkdhWGJoWU1nIiwidGlkIjoiOGQzNWJhMjEtNGJhNy00YTQ1LWFjYTAtMmU0OTA5MmQ1NTE4IiwidW5pcXVlX25hbWUiOiJhLmhhemVtQG5vdXNkaWdpdGFsLm5ldCIsInVwbiI6ImEuaGF6ZW1Abm91c2RpZ2l0YWwubmV0IiwidXRpIjoib3lTRkRBZUVEVS1xUnkyYTctaFlBQSIsInZlciI6IjEuMCIsIndpZHMiOlsiYjc5ZmJmNGQtM2VmOS00Njg5LTgxNDMtNzZiMTk0ZTg1NTA5Il19.It6tzQ4TPr6tgCnNAPhfLa19pFDSNeC5USOWk00pRhujua8alEHD5sTLNL-oHWTAGpmMYJ780Ov5ydAC-KhJhPHduT_yyvkJVG-YxPY83GmIsao7IXReQpueD62xcqE8Uo6QxT0paCYFge87_Ji-b20ZD4lO1F8Ngbz2d0CP8RRV1XR6feaF_dnVlXedmIPr8h-R6liEVENdKGFJEdB9IxV2j8AjBgxez46OmgaSQjKyRAcGy9IfUeNtnE2OvjrSXELaTacRl9BPI_9eZUheqUTvfJzflU04BApzO8-a1oCJ8HGYz7zmwg8my-abqPJkdu7pNG1FINFlq50G3GE5SQ";
-    let accessToken = "H4sIAAAAAAAEACWTtY7FBgAE_-VaRzJTpBRmtp8ZOjMzPTvKv-ei9FPNzv7980mfYU6Lnz9_Xna6hQSatkBTascTsi0rFpWpQTTntf72SMp2ShoaYJSoz6yXoSCnzmWp_Tnwj7Xoh9jo-mlEBjkRDAHNRYTxPd7nW5Az8wqCmPLUZiQHUAiWP8DDhhhYe7Nzg50y50uYLQ8eHnYPdysnmV4A7Jlo1tanNO-FwavvPEtZl9CcVMV-xIoPMYYRX0XTRKYHnNjnxb9G9_SHKooV-gouP5pcJs7jwW_FCrcxC8kpBQ6YK-ggMLsU7XQr6qkMwSZnGjyxvdcOgDq8A_QscmNml-QQDIqW662bF1lMUxhIyL-pBbXmJXkpctM9Tl3RkBHerD8rETb2DOtF0ufPuHLWI2ByjXgDqXrNeYJqvHygWTQkPTqI3vZwdGxXV-6wiqwaYoTf5QDYhSAT8W5Y3XiwEwVN7nXtTWGvaHRTZBlyUuW0bkQzLLHTUYXhi4bXi-QA8-vNcyBWFFYZvBueFxXC1SOihq5PG7LNY7_ys3Dze05rWHHS6DBQaAeWU00odfMxDzc7sMDBf1f0VZBIE_gsdUyLbOnzrCHWKptLRKBnrEDBYqekubCijH365TomUbKb8mIsCDeVNKSs8bgax8l2zrh-Y3Ux1pEPcyXGeuUdWNEJvx1ePSFf4TkXQqZlFKNQOSoBNNL12-WjoxE5FHVOOccYx_U6Y5Xm8EbsTdaCyzRGum3QnTkXkV_hDtaatlTXAhXqlLIpc152gPxYUMVQxigTeualmrgj5aZi31N_v2vIg0sb0m2riBbh-Pka6gs82ePakxlTReRXMSkWJuVurjYirHUUi-AdhAiQSj3WO2kHoHOsYMbyVtu5_nB9wOODEcOonfg_f_xw27Mcs1Y-v3dqV-vJHuKRAMKoFJoBh2et8kB__Kfc6Wm71C6hYKzJeQHYajjdVYIbVgJeizscszWzcFHkxkFcilyl5GH6ipDjMW4MIgy498OlyxWMGrFenJY_tUH48cPCceWJRe2Mg3abhvcmVhlGzoKz3x77TPTEm7XNLlW_38IJG7_OQ2Vz-bAq9fZ4GY4aygvSAeliM8B77Ic6HRk8K2OsoXofiT_cdLNhQoklLPURMl0lDcU-y1uMjJ6Wtk_xitL6VoZ8vvgEDGwxA8ct21kOshpKspd1ChPtdgyruOJ83d7cv9McF-zouNeV0Hj_kq-ELyQ0oiuWAIZKObIQuduh3dZU49Xpd_Zff_2n-VmaclOCX8uw327GW3yNhxCfiiCzWCSg_ym3raf0OLfyFys48BiIPabvzHZfJqzxHcdOAZTDXIsQVpI3-akrCz_leIjQ0kl253tJbihqtt1hpJ0GmvULMBk_U2V5V8fWcoT-QLIj2zIm-9jllH5_BaG4fwCNEuwlUMw-0AIGmvKWCuwYuAiRLoL1XaH3S16h0eQIB2UuTQNXhSWCAqCZbs4IJmKm9M0i3pqeQAr23WVJ-IoVHvU4JHqHXTa5XRB6690NT-q_uAdG5pDuX9XcXbgsLB38jVf0TkILbJUXAkyfncxpe2-iNaY6sFlTjMSqHEctWxAcnEABUfPzwm3jzouZKfC2BrR2zmCyZk1h19073905JGHz8WK3y9d7XfeutPW7_tX8z7-qGKCuQgYAAA==.eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly9XQUJJLVdFU1QtRVVST1BFLUItUFJJTUFSWS1yZWRpcmVjdC5hbmFseXNpcy53aW5kb3dzLm5ldCIsImVtYmVkRmVhdHVyZXMiOnsibW9kZXJuRW1iZWQiOmZhbHNlfX0=";
+    let accessToken = "H4sIAAAAAAAEACWUt66EVgAF_-W1WCKzYMnFkllyuoSOnHNasPzvfpb7qUZnzt8_VnL3U5L__PmDVuQ8ak5qp4hM6zLVPrvs-Ea5bBSauId1ezRu-UhhHWljOd7LpE0dukpWTLrpo-2aliBfL8wayg4Sk_dPJQQ5aTI-I26DVquoQV-0e4SRnefSRd-N90k1OfVOGOiAZicVZ2AZr90v1eDPqYuOuxDThgparIJMQGy9ggIsgKcCXjLujM5teekwK7-xWIEELi2tlmMmSh6ZCvali3r8c4sMaLknV7DAcdfKPNuj7p6WCeJSbhiKKxmokkObMVCZdOoFAb7qyi544vcb6DPB2E45UZCWlm6ab6gJMQ_7nW7xraXk68ULBpsEk_aSJL85SVf9Hl1mWdw3MOPLRS_0RHsDl6I7D6MJ8nbYaAIBCDV1gZpIEmaX70P4Kp4u0z4VHlpmrpIhtE_dlt0tajCe9FFSFgqfW9Q3lTgniT0616aK1JRXZrE6XwnhZ4j0oM5MnuDGgiOZubHz2bGl9uYGLmwSItY2JWrxejRCoTjI9jhJfXjYOt5bVI9YVliueiouye4-0wVTUw0CxdsWFdu6tK4wTaOCG4BxphskYYLNyae4zjP1WknulsZNrFzZgHEHJtrBqV8w8lDIoWJUtMipI_ZXTCmwjX91enDv5YULa_XtdqGYSZ0l7_JjalnM-XwviEWg5zUhifcdfoRXgQGykDbROVPdT-Ad46gPhq0QnVDOjIVLtLIiTDJlz6_uuget4h28VTlXGqu0Zidzu2H6pxxYSVVW-4PkHxlVC2nw8nFYQ8l1Z5SFRjP0PQwordILBERmz-Vu_bgAuk4dxGc7wd_FBpW0K6mRGTP1QRTOrOnURcLKqY6sGk9YpRSRZyF2uXTV-P3zxw-33vM-qcX9m5N_nLf_etTY6V1AgIsLrcNiA2tOD7sPkWqHgXCBZHrFTUASW-RWJDUNWjELZAnWxjxg9pTxcQQOKAKA1sZ8QRwh3IYgJluoNLdRYx0m9bTDo0VB0MmrXkZ5i7SKuUbGfok-twr203NMPIXiJTRUUYiBWJR-xcD9gJXWNiyuoJbVKe5bHDnPsDULdfTxlqLQzgRgx6qj3eFi3kwyy04OQNZK11FKdUtzJppFZG-6elryK57vLo59nmV_X-JsOI5aWuvLuUm_XhaxWM_VxxCWv0t5JFKvuCJPv6HNioRgsHUVnw8EE0L2e9oDzxkkf7awwDUfF6IbsJQ04uKrvxQwrmzm9ddf_2m-57pYFfBr-Unwq_XrtUlIBrtBxzAdxP1PuU01JvuxFr_YYWebXHiAPYiOjSziKGueYRGY5DwqyBL-xXmVYtpNrGX1S8a7XhXVaftWEd9TDxnLVdOvHblzt3lKLfgSp8TX-ernVcPMqzRzh2xCHj8pasSJSoCsZSjTn3HRx6P_5nsgfudkbdVz9Rslyge9ZQjVRO2Q1cIYIx-Ls3a45VOYxwxVmvZxvxPTW8EtW03StJ1qiC0TeW9uxhocyZkIVftxV7mMlORAG-k3Ttwai1lTNX-41mHfsCWNyu9K-PRuhpZloTQRXGpUbYyij3Db6kNNpkjFg-mOPttNy6mJavf4QUL4AxvMTNqlxavlau_UELWh-Zib0GxQt6xSLoEzXMXR3f3_NP_zLyQLiPdCBgAA.eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly9XQUJJLVdFU1QtRVVST1BFLUItUFJJTUFSWS1yZWRpcmVjdC5hbmFseXNpcy53aW5kb3dzLm5ldCIsImVtYmVkRmVhdHVyZXMiOnsibW9kZXJuRW1iZWQiOmZhbHNlfX0=";
 
     // Read embed URL
 //    let embedUrl = "https://app.powerbi.com/reportEmbed?reportId=f48b9c40-cf4c-4e5d-9ec5-8c1a530c2c1b&autoAuth=true&ctid=8d35ba21-4ba7-4a45-aca0-2e49092d5518&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly93YWJpLXdlc3QtZXVyb3BlLWUtcHJpbWFyeS1yZWRpcmVjdC5hbmFseXNpcy53aW5kb3dzLm5ldC8ifQ%3D%3D";
@@ -81,7 +82,7 @@ function embedPowerBIReport() {
     report.on("loaded", async function () {
         loadedResolve();
         report.off("loaded");
-        let pages = await report.getPages();
+        pages = await report.getPages();
         let log = "Report pages:";
         for (var i = 0; i< pages.length; i++) {
             log += "\n" + pages[i].name + " - " + pages[i].displayName;
@@ -132,3 +133,24 @@ function embedPowerBIReport() {
 //await reportRendered;
 //
 //// Insert here the code you want to run after the report is rendered
+
+async function getVisualsData(pageName, visualName) {
+    DebugChannel.postMessage("Page Name: " + pageName);
+    DebugChannel.postMessage("Page Visual: " + visualName);
+    let page = await report.getPageByName(pageName);
+    let visual = await page.getVisualByName(visualName);
+    let results = await visual.exportData(models.ExportDataType.Summarized, 100);
+    DebugChannel.postMessage("results done");
+    VisualDataChannel.postMessage(JSON.stringify(results));
+}
+
+
+/*
+report.setVisualDisplayState -> will be used to show / hide an visual
+*/
+
+/*
+Report Docs -> https://docs.microsoft.com/en-us/javascript/api/powerbi/powerbi-client/report.report
+Page Docs -> https://docs.microsoft.com/en-us/javascript/api/powerbi/powerbi-client/page.page
+Visual Docs -> https://docs.microsoft.com/en-us/javascript/api/powerbi/powerbi-client/visual
+*/

@@ -10,9 +10,16 @@ class JavascriptHandler implements IJavascriptHandler {
   }
 
   @override
-  getInitWebViewDimensionsFunction(double height) {
+  String getInitWebViewDimensionsFunction(double height) {
     return '''
     initWebViewDimensions("$powerBiEmbededDivision", $height);
+  ''';
+  }
+
+  @override
+  String getVisualsData(String pageName, String visualName) {
+    return '''
+    getVisualsData("$pageName", "$visualName");
   ''';
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:bower_bi/js/bundle_handler.dart';
 import 'package:bower_bi/js/html_handler.dart';
 import 'package:bower_bi/js/i_javascript_handler.dart';
@@ -18,7 +20,8 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
   late WebViewController _webViewController;
   final IJavascriptHandler javascriptHandler = JavascriptHandler();
   late WebViewService _webViewService;
-
+  String selectedValue = '';
+  List<String> availableDates = [];
   @override
   void initState() {
     super.initState();
@@ -32,40 +35,73 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: FutureBuilder(
-        future: _webViewService.initWebViewUri(),
-        builder: (context, snapshot) {
-          return snapshot.hasData ? Column(
-            children: [
-              Expanded(
-                key: heightKey,
-                child: WebView(
-                  initialUrl: _webViewService.uri.toString(),
-                  javascriptMode: JavascriptMode.unrestricted,
-                  javascriptChannels: {
-                    JavascriptChannel(
-                      name: _jsDebugChannel,
-                      onMessageReceived: (JavascriptMessage msg) {
-                        print(msg.message);
-                      }
-                    ),
+      child: Scaffold(
+        body: FutureBuilder(
+          future: _webViewService.initWebViewUri(),
+          builder: (context, snapshot) {
+            return snapshot.hasData ? Column(
+              children: [
+                DropdownButton<String>(
+                  value: selectedValue,
+                  onChanged: (newValue) {
+                    setState(() {
+                      selectedValue = newValue??'';
+                    });
                   },
-                  onWebViewCreated:
-                      (WebViewController webViewController) {
-                    _webViewController = webViewController;
-                  },
-                  onPageFinished: (_) async {
-                    await _webViewController.evaluateJavascript(javascriptHandler
-                        .getTestCommunications());
-                    final keyContext = heightKey.currentContext;
-                    await _webViewController.evaluateJavascript(javascriptHandler
-                        .getInitWebViewDimensionsFunction(keyContext!.size!.height));
-                  },
+                  items: availableDates.map(
+                    (e) => DropdownMenuItem<String>(
+                        value: e,
+                        child: Text(e)
+                    )
+                  ).toList()
                 ),
-              ),
-            ],
-          ): const Center(child: CircularProgressIndicator());
-        }
+                Expanded(
+                  key: heightKey,
+                  child: WebView(
+                    initialUrl: _webViewService.uri.toString(),
+                    javascriptMode: JavascriptMode.unrestricted,
+                    javascriptChannels: {
+                      JavascriptChannel(
+                        name: _jsDebugChannel,
+                        onMessageReceived: (JavascriptMessage msg) {
+                          print(msg.message);
+                        }
+                      ),
+                      JavascriptChannel(
+                        name: _jsVisualDataChannel,
+                        onMessageReceived: (JavascriptMessage msg) {
+                          var visualData = json.decode(msg.message);
+                          List<String> dates = visualData["data"].split("\r\n");
+                          setState(() {
+                            availableDates = dates;
+                          });
+                          print(visualData);
+                        }
+                      )
+                    },
+                    onWebViewCreated:
+                        (WebViewController webViewController) {
+                      _webViewController = webViewController;
+                    },
+                    onPageFinished: (_) async {
+                      await _webViewController.evaluateJavascript(javascriptHandler
+                          .getTestCommunications());
+                      final keyContext = heightKey.currentContext;
+                      await _webViewController.evaluateJavascript(javascriptHandler
+                          .getInitWebViewDimensionsFunction(keyContext!.size!.height));
+                    },
+                  ),
+                ),
+              ],
+            ): const Center(child: CircularProgressIndicator());
+          }
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            await _webViewController.evaluateJavascript(javascriptHandler
+                .getVisualsData("ReportSectiondab2fb566641af96da92", "0d3836c206909c0ca001"));
+          },
+        ),
       ),
     );
 
@@ -73,6 +109,8 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
 }
 
 const String _jsDebugChannel = 'DebugChannel';
+const String _jsVisualDataChannel = 'VisualDataChannel';
+
 const String _jsErrorChannel = 'ErrorChannel';
 const String _jsInteractChannel = 'InteractChannel';
 const String _jsCreateChannel = 'CreateChannel';
