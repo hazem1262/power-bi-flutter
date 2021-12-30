@@ -1,0 +1,682 @@
+import React, { useMemo, useRef, useState } from 'react';
+import { Embed, models, Page, Report, service } from 'powerbi-client';
+import { PowerBIEmbed } from 'powerbi-client-react';
+import { Checkbox, List, Select, Button, Typography } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
+import AgGrid from 'ui/components/ag-grid';
+import moment from 'moment';
+import csvtojsonV2 from 'csvtojson';
+import { ToolPanelDef } from 'ag-grid-community/dist/lib/entities/sideBar';
+
+import './power-bi.less';
+
+let MyReport: Embed | Report;
+let ActivePage: Page;
+const { Text } = Typography;
+export default (props: any): React.ReactElement => {
+  const {
+    embedUrl,
+    accessToken,
+    showPagesList = true,
+    showVisualsList = true,
+    customVisuals = false,
+  } = props;
+  // const ShowCaseMargin = 16;
+  // const ShowCaseColumns = 3;
+  // const VisualAspectRatio = 9 / 16;
+  // For the decision of the layout
+  // const COLUMNS = {
+  //   ONE: 1,
+  //   TWO: 2,
+  //   THREE: 3,
+  // };
+
+  const ref = useRef(null);
+  const [visualDates, setVisualDates] = useState([]);
+  const [activeVisualDate, setActiveVisualDate] = useState('');
+  const [report, setReport] = useState<Report>();
+  const [activePageName, setActivePageName] = useState<string>('');
+  const [toggleVisuals, setToggleVisuals] = useState<boolean>(false);
+  const [pages, setPages] = useState<any>([]);
+  const [pageVisuals, setPageVisuals] = useState<any>();
+  const [reportConfig, setReportConfig] = useState<models.IReportEmbedConfiguration>({
+    type: 'report',
+    embedUrl,
+    tokenType: models.TokenType.Embed,
+    accessToken,
+    settings: {
+      background: models.BackgroundType.Transparent,
+      layoutType: models.LayoutType.Custom,
+      panes: {
+        pageNavigation: {
+          visible: false,
+        },
+        filters: {
+          visible: false,
+        },
+      },
+    },
+  });
+  const [attendanceList, setAttendanceList] = useState<any>();
+  const [teamCrews, setTeamCrews] = useState<string[]>([]);
+  const [activeCrewName, setActiveCrewName] = useState('');
+  const renderVisuals = async (): Promise<void> => {
+    if (!MyReport) {
+      console.log('Report not available');
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const reportPages = await MyReport?.getPages();
+    const repotActivePage = reportPages?.filter((page: Page) => {
+      return page.isActive;
+    })[0];
+
+    // const visiblePages = pages.filter((filterPage: Page) => filterPage.visibility === 0);
+
+    // get Active Page
+    // const activePageName = repotActivePage?.name;
+
+    // Get all visuals in the active page
+    const visuals = await repotActivePage?.getVisuals();
+    const reportVisuals = visuals?.map((visual: any) => ({
+      ...visual,
+      checked: true,
+    }));
+
+    // for custom visuals check
+    if (customVisuals) {
+      // Retrieve the target visual for date.
+      const dateVisual = visuals.filter((visual: any) => {
+        return visual.title === 'Date';
+      })[0];
+
+      // Exports visual data fro Dates
+      const result = await dateVisual.exportData(models.ExportDataType.Summarized);
+      const dates = result.data.split('\n');
+      dates.shift();
+      const filterDates = dates.map((date: string) => {
+        date = date.replace('\r', '');
+        return moment(date).format('YYYY-MM-DD');
+      });
+
+      // Retrieve the target visual for Crews.
+      const crewVisual = visuals.filter((visual: any) => {
+        return visual.title === 'Team (Crew)';
+      })[0];
+
+      // Exports visual data fro Crews
+      const resultSummaryCrews = await crewVisual.exportData(models.ExportDataType.Summarized);
+      const crews = resultSummaryCrews.data.split('\n');
+      const filterCrews = crews.map((crew: string) => crew.replace('\r', ''));
+      filterCrews.pop();
+      filterCrews.shift();
+
+      setTeamCrews(filterCrews);
+      setVisualDates(filterDates);
+    }
+    // Remove all visuals without titles (i.e cards)
+    // reportVisuals = reportVisuals?.filter((visual: any) => {
+    // 	return visual.title !== undefined;
+    // });
+
+    // Filter the visuals list to display only the checked visuals
+    // const checkedVisuals = reportVisuals?.filter((visual: any) => {
+    //   return visual.checked;
+    // });
+
+    // Calculating the combined width of the all visuals in a row
+    // let visualsTotalWidth = reportWidth - ShowCaseMargin * (ShowCaseColumns + 1);
+
+    // Get all the available width for visuals total width, get the space from right margin of the report
+    // visualsTotalWidth += ShowCaseMargin / 2;
+    // Calculate the width of a single visual, according to the number of columns
+    // For one and three columns visuals width will be a third of visuals total width
+    // const visualWidth = visualsTotalWidth / ShowCaseColumns;
+
+    // Building visualsLayout object
+    // const visualsLayout = {};
+
+    // Visuals starting point
+    // let x = ShowCaseMargin;
+    // let y = ShowCaseMargin;
+
+    // Calculate visualHeight with margins
+    // const visualHeight = visualWidth * VisualAspectRatio;
+
+    // Section means a single unit that will be repeating as pattern to form the layout
+    // These 2 variables are used for the 2 custom layouts with spanning
+    // const rowsPerSection = 2;
+    // const visualsPerSection = 3;
+
+    // Calculate the number of rows
+    // let rows = 0;
+
+    // @ts-ignore
+    // rows = Math.ceil(checkedVisuals?.length / COLUMNS.THREE);
+    // reportHeight = Math.max(reportHeight, rows * visualHeight + (rows + 1) * ShowCaseMargin);
+
+    // checkedVisuals?.forEach((element: any) => {
+    //   // @ts-ignore
+    //   visualsLayout[element.name] = {
+    //     x,
+    //     y,
+    //     width: visualWidth,
+    //     height: visualHeight,
+    //     displayState: {
+    //       // Change the selected visuals display mode to visible
+    //       mode: models.VisualContainerDisplayMode.Visible,
+    //     },
+    //   };
+    //
+    //   // Calculating (x,y) position for the next visual
+    //   x += visualWidth + ShowCaseMargin;
+    //
+    //   // Reset x
+    //   if (x + visualWidth > reportWidth) {
+    //     x = ShowCaseMargin;
+    //     y += visualHeight + ShowCaseMargin;
+    //   }
+    // });
+    // Building visualsLayout object
+    // Building pagesLayout object
+    // const pagesLayout = {};
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // pagesLayout[activePageName] = {
+    //   defaultLayout: {
+    //     displayState: {
+    //       // Default display mode for visuals is hidden
+    //       mode: models.VisualContainerDisplayMode.Hidden,
+    //     },
+    //   },
+    //   visualsLayout,
+    // };
+
+    // Building settings object
+    // const activeSettings = {
+    //   customLayout: {
+    //     pageSize: {
+    //       type: models.PageSizeType.Standard,
+    // width: reportWidth,
+    // height: reportHeight,
+    // },
+    // displayOption: models.DisplayOption.ActualSize,
+    // pagesLayout,
+    // },
+    // };
+
+    setReportConfig({
+      ...reportConfig,
+      embedUrl,
+      accessToken,
+      // settings: {
+      //   ...reportConfig.settings,
+      //   customLayout: {
+      //     ...activeSettings.customLayout,
+      //   },
+      // },
+    });
+    setPageVisuals(reportVisuals);
+    setPages(reportPages);
+    setActivePageName(repotActivePage?.name);
+    ActivePage = repotActivePage;
+    // setActivePage(repotActivePage);
+  };
+
+  const getActivePage = async (powerbiReport: Report): Promise<Page | undefined> => {
+    // eslint-disable-next-line no-shadow
+    const pages = await powerbiReport.getPages();
+
+    // Get the active page
+    return pages.filter((page) => {
+      return page.isActive;
+    })[0];
+  };
+
+  // Map of event handlers to be applied to the embedding report
+  const eventHandlersMap = new Map([
+    [
+      'loaded',
+      (): void => {
+        console.log('Report has loaded', report);
+        renderVisuals();
+      },
+    ],
+    [
+      'rendered',
+      async (): Promise<void> => {
+        console.log('Report has rendered', report);
+        // @ts-ignore
+        // eslint-disable-next-line no-shadow
+        // const reportPages = await MyReport?.getPages();
+        // const repotActivePage = reportPages?.filter((page: Page) => {
+        //   return page.isActive;
+        // })[0];
+
+        const visuals = await ActivePage?.getVisuals();
+        // Retrieve the target visual.
+        const attendanceVisual = visuals.filter((visual: any) => {
+          return visual.title === 'Attendance Details';
+        })[0];
+
+        const attendanceDetails = await attendanceVisual.exportData(
+          models.ExportDataType.Summarized,
+        );
+        const jsonCsv = await csvtojsonV2({
+          noheader: false,
+          headers: [
+            'date_shift',
+            'sap_id',
+            'worker_name',
+            'crew_name',
+            'trade',
+            'shift_start',
+            'actual_arrival',
+            'arrived_productive_zone',
+            'shift_end',
+            'left_productive_zone',
+            'actual_leave',
+            'expected_working',
+            'active',
+            'undelivered',
+            'active_productive_zone',
+            'store_areas',
+            'rest_area',
+          ],
+        }).fromString(attendanceDetails.data);
+        setAttendanceList(jsonCsv);
+        // Update display message
+      },
+    ],
+    [
+      'error',
+      (event?: service.ICustomEvent<any>): void => {
+        if (event) {
+          console.error(event.detail);
+        }
+      },
+    ],
+    // [
+    //   'dataSelected',
+    //   (event?: service.ICustomEvent<any>): void => {
+    //     const data = event?.detail;
+    //     console.log('Event - dataSelected:\n', data);
+    //   },
+    // ],
+  ]);
+
+  const onVisualChange = async (value: any): Promise<void> => {
+    if (!report) {
+      return;
+    }
+    // eslint-disable-next-line no-shadow
+    const activePage = await getActivePage(report);
+    activePage?.setVisualDisplayState(value?.name, value.checked ? 1 : 0);
+
+    value.checked = !value.checked;
+    const updatedVisuals = [...pageVisuals];
+    const indexOfSelectedVisual = pageVisuals.indexOf(value);
+    updatedVisuals[indexOfSelectedVisual] = value;
+    setPageVisuals(updatedVisuals);
+  };
+
+  const updateVisuals = async (): Promise<void> => {
+    if (!report) {
+      return;
+    }
+
+    // eslint-disable-next-line no-shadow
+    const activePage = await getActivePage(report);
+
+    if (!activePage) {
+      console.log('No active page');
+      return;
+    }
+
+    // Get all visuals in the active page
+    const visuals = await activePage.getVisuals();
+
+    if (visuals.length === 0) {
+      console.log('No visual left');
+      return;
+    }
+
+    const myVisuals = visuals.map((visual) => ({
+      ...visual,
+      name: visual.name,
+      title: visual.title,
+      checked: true,
+    }));
+    setPageVisuals(myVisuals);
+  };
+
+  const onChangeActivePage = async (pageId: any): Promise<void> => {
+    await report?.setPage(pageId);
+    setActivePageName(pageId);
+    updateVisuals();
+  };
+
+  const ListingPages = (): React.ReactElement => {
+    return (
+      <Select
+        value={activePageName}
+        onSelect={onChangeActivePage}
+        style={{ width: 140, display: 'flex', alignItems: 'center' }}
+      >
+        {pages.map((page: any, index: number) => (
+          <Select.Option key={`${index}`} value={`${page.name}`} title={page.displayName}>
+            {page.displayName}
+          </Select.Option>
+        ))}
+      </Select>
+    );
+  };
+
+  const BiHeader = (): React.ReactElement => {
+    return (
+      <div className="header">
+        {showPagesList && <ListingPages />}
+        {showVisualsList && (
+          <div>
+            <Button
+              type="primary"
+              onClick={(): void => {
+                setToggleVisuals(!toggleVisuals);
+              }}
+            >
+              Choose Visuals
+              <DownOutlined />
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const ListingVisuals = (): React.ReactElement => {
+    return (
+      <List
+        itemLayout="vertical"
+        dataSource={pageVisuals}
+        renderItem={(item: any): any => (
+          <List.Item>
+            <Checkbox
+              onChange={(): void => {
+                onVisualChange(item);
+              }}
+              checked={item.checked}
+            >
+              {item.title}
+            </Checkbox>
+          </List.Item>
+        )}
+      />
+    );
+  };
+
+  const onVisualsDateChange = async (date: string): Promise<void> => {
+    setActiveVisualDate(date);
+    // Create the filter object. For more information see https://go.microsoft.com/fwlink/?linkid=2153364
+    const filter = {
+      $schema: 'http://powerbi.com/product/schema#advanced',
+      target: {
+        table: 'Date Shift',
+        column: 'Date Shift',
+      },
+      filterType: models.FilterType.Advanced,
+      logicalOperator: 'And',
+      conditions: [
+        {
+          operator: 'GreaterThanOrEqual',
+          value: moment(date)
+            .utc()
+            .local()
+            .hours(0)
+            .format('YYYY-MM-DDTHH:mm:ss'),
+        },
+        {
+          operator: 'LessThanOrEqual',
+          value: moment(date)
+            .utc()
+            .local()
+            .hours(23)
+            .minutes(59)
+            .format('YYYY-MM-DDTHH:mm:ss'),
+        },
+      ],
+    };
+
+    // Retrieve the page collection and get the visuals for the active page.
+    try {
+      // @ts-ignore
+      // eslint-disable-next-line no-shadow
+      const pages = await MyReport?.getPages();
+      // Retrieve the active page.
+      // eslint-disable-next-line no-shadow
+      const page = pages.filter((page: any) => {
+        return page.isActive;
+      })[0];
+
+      const visuals = await page.getVisuals();
+
+      // Retrieve the target visual.
+      const slicer = visuals.filter((visual: any) => {
+        return visual.type === 'slicer' && visual.title === 'Date';
+      })[0];
+
+      // Set the slicer state which contains the slicer filters.
+      await slicer.setSlicerState({ filters: [filter] });
+      // await page.updateFilters(models.FiltersOperations.Add, [filter]);
+      // console.log('Page filter was added.');
+    } catch (errors) {
+      console.log(errors);
+    }
+  };
+
+  const onTeamCrewChange = async (crew: string): Promise<void> => {
+    setActiveCrewName(crew);
+    // Create the filter object. For more information see https://go.microsoft.com/fwlink/?linkid=2153364
+    const filter = {
+      $schema: 'http://powerbi.com/product/schema#basic',
+      target: {
+        table: 'Team (Current)',
+        column: 'CrewName',
+      },
+      operator: 'In',
+      values: [crew],
+      filterType: models.FilterType.Basic,
+    };
+
+    // Retrieve the page collection and get the visuals for the active page.
+    try {
+      await ActivePage.updateFilters(models.FiltersOperations.Add, [filter]);
+    } catch (errors) {
+      console.log(errors);
+    }
+  };
+
+  const CustomVisuals = (): React.ReactElement => {
+    return (
+      <div className="custom-visuals-header">
+        <div>
+          <Text strong>Select Date</Text>
+          <Select
+            value={activeVisualDate}
+            onSelect={onVisualsDateChange}
+            style={{ width: 140, display: 'flex', alignItems: 'center', marginBottom: '8px' }}
+          >
+            {visualDates.map((date: string, index: number) => (
+              <Select.Option key={`${index}`} value={date} title={date}>
+                {date}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+
+        <div>
+          <Text strong>Team (Crew)</Text>
+          <Select
+            value={activeCrewName}
+            onSelect={onTeamCrewChange}
+            style={{ width: 140, display: 'flex', alignItems: 'center', marginBottom: '8px' }}
+          >
+            {teamCrews.map((crew: string, index: number) => (
+              <Select.Option key={`${index}`} value={crew} title={crew}>
+                {crew}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+      </div>
+    );
+  };
+
+  const columns: Array<any> = useMemo(() => {
+    const columnList = [
+      {
+        header: 'Date Shift',
+        field: 'date_shift',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Sap ID',
+        field: 'sap_id',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Worker Name',
+        field: 'worker_name',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Crew Name',
+        field: 'crew_name',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Trade',
+        field: 'trade',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Shift Start',
+        field: 'shift_start',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Actual Arrival',
+        field: 'actual_arrival',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Arrived Productive Zone',
+        field: 'arrived_productive_zone',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Shift End',
+        field: 'shift_end',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Left Productive Zone',
+        field: 'left_productive_zone',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Actual Leave',
+        field: 'actual_leave',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Expected Working',
+        field: 'expected_working',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Active',
+        field: 'active',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Undelivered',
+        field: 'undelivered',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Active Productive Zone',
+        field: 'active_productive_zone',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Store Areas',
+        field: 'store_areas',
+        filter: 'agMultiColumnFilter',
+      },
+      {
+        header: 'Rest Area',
+        field: 'rest_area',
+        filter: 'agMultiColumnFilter',
+      },
+    ];
+    return columnList;
+  }, []);
+
+  const toolPanels: (ToolPanelDef | string)[] = [
+    {
+      id: 'columns',
+      labelDefault: 'Columns',
+      labelKey: 'columns',
+      iconKey: 'columns',
+      toolPanel: 'agColumnsToolPanel',
+    },
+    {
+      id: 'filters',
+      labelDefault: 'Filters',
+      labelKey: 'filters',
+      iconKey: 'filter',
+      toolPanel: 'agFiltersToolPanel',
+    },
+  ];
+
+  // useEffect(() => {
+  //   if (report) {
+  //     report.on('rendered', () => {
+  //       console.log('there here', report);
+  //       console.log('there here', pages);
+  //     });
+  //   }
+  // }, [report]);
+  return (
+    <div ref={ref} style={{ position: 'relative' }} className="power-bi-list-grid">
+      {showVisualsList && showPagesList && <BiHeader />}
+      {toggleVisuals && <ListingVisuals />}
+      {customVisuals && (
+        <>
+          <CustomVisuals />
+          <AgGrid
+            rowData={attendanceList}
+            columns={columns}
+            showCharts={true}
+            toolPanels={toolPanels}
+            allowCsvExport={true}
+            allowExcelExport={true}
+            columnResize={true}
+          />
+        </>
+      )}
+      <PowerBIEmbed
+        embedConfig={reportConfig}
+        eventHandlers={eventHandlersMap}
+        cssClassName={customVisuals ? 'report-style-none' : 'report-style-class'}
+        getEmbeddedComponent={(embedObject: Embed): void => {
+          console.log(`Embedded object of type "${embedObject.embedtype}" received`);
+          MyReport = embedObject;
+          setReport(embedObject as Report);
+        }}
+      />
+    </div>
+  );
+};

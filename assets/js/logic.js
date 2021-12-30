@@ -1,17 +1,6 @@
 function initWebViewDimensions(mapDivision, height){
     document.getElementById(mapDivision).setAttribute("style","width:100%; height:"+height+"px");
 }
-function embedPowerBi(embedUrl, reportId, token){
-    if(DebugChannel !== undefined) {
-                DebugChannel.postMessage("test channel communication");
-                embedPowerBIReport()
-//                await reportLoaded;
-
-                // Insert here the code you want to run after the report is loaded
-
-//                await reportRendered;
-            }
-}
 
 let loadedResolve, reportLoaded = new Promise((res, rej) => { loadedResolve = res; });
 let renderedResolve, reportRendered = new Promise((res, rej) => { renderedResolve = res; });
@@ -26,7 +15,6 @@ function embedPowerBi(embedUrl, embedReportId, accessToken) {
     let tokenType = '1';
     // We give All permissions to demonstrate switching between View and Edit mode and saving report.
     let permissions = models.Permissions.All;
-
     // Create the embed configuration object for the report
     // For more information see https://go.microsoft.com/fwlink/?linkid=2153590
     let config = {
@@ -42,7 +30,7 @@ function embedPowerBi(embedUrl, embedReportId, accessToken) {
                     visible: true
                 },
                 pageNavigation: {
-                    visible: true
+                    visible: false
                 }
             }
         }
@@ -59,32 +47,7 @@ function embedPowerBi(embedUrl, embedReportId, accessToken) {
 
     // report.on will add an event handler
     report.on("loaded", async function () {
-        loadedResolve();
-        report.off("loaded");
-        pages = await report.getPages();
-        let log = "Report pages:";
-        for (var i = 0; i< pages.length; i++) {
-            log += "\n" + pages[i].name + " - " + pages[i].displayName;
-            log += "\n" + "Page Visuals:";
-            let visuals = await pages[i].getVisuals();
-            for (var j = 0; j< visuals.length; j++) {
-                log += "\n" + visuals[j].name + " - " + visuals[j].title;
-                try {
-                    let result = await visuals[j].exportData(models.ExportDataType.Summarized, 2);
-                    log += "\n" + "Visual data:";
-                    log += "\n" + result.data;
-                } catch (e) {
-                    DebugChannel.postMessage("catch error");
-                    DebugChannel.postMessage(e);
-                }
-
-//
-//
-            }
-        }
-
-        DebugChannel.postMessage(log);
-        console.log(log);
+        exposeData();
     });
 
     // report.off removes all event handlers for a specific event
@@ -104,14 +67,42 @@ function embedPowerBi(embedUrl, embedReportId, accessToken) {
     });
 }
 
-//embedPowerBIReport();
-//await reportLoaded;
-//
-//// Insert here the code you want to run after the report is loaded
-//
-//await reportRendered;
-//
-//// Insert here the code you want to run after the report is rendered
+async function exposeData() {
+    loadedResolve();
+    report.off("loaded");
+    pages = await report.getPages();
+    let log = "Report pages:";
+    let results = [];
+    for (var i = 0; i< pages.length; i++) {
+        log += "\n" + pages[i].name + " - " + pages[i].displayName;
+        log += "\n" + "Page Visuals:";
+        let visuals = await pages[i].getVisuals();
+//        pages[i].visuals = visuals;
+        let resultPage = {
+                            "pageId"      : pages[i].name,
+                            "pageName"    : pages[i].displayName,
+                            "pageVisuals" : []
+                        }
+        for (var j = 0; j< visuals.length; j++) {
+            log += "\n" + visuals[j].name + " - " + visuals[j].title;
+            resultPage.pageVisuals.push({"visualId":visuals[j].name, "visualName":visuals[j].title})
+            try {
+                let result = await visuals[j].exportData(models.ExportDataType.Summarized, 2);
+                log += "\n" + "Visual data:";
+                log += "\n" + result.data;
+            } catch (e) {
+                DebugChannel.postMessage("catch error");
+                DebugChannel.postMessage(e);
+            }
+        }
+        results.push(resultPage);
+    }
+    DebugChannel.postMessage(log);
+    DebugChannel.postMessage("before");
+    VisualDataChannel.postMessage(JSON.stringify(results));
+    DebugChannel.postMessage("after");
+
+}
 
 async function getVisualsData(pageName, visualName) {
     DebugChannel.postMessage("Page Name: " + pageName);
