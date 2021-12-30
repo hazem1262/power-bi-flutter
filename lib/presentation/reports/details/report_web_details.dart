@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:bower_bi/data/embed_report_entity.dart';
 import 'package:bower_bi/js/bundle_handler.dart';
 import 'package:bower_bi/js/html_handler.dart';
 import 'package:bower_bi/js/i_javascript_handler.dart';
@@ -8,6 +8,7 @@ import 'package:bower_bi/js/local_storage_handler.dart';
 import 'package:bower_bi/js/web_view_service.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:http/http.dart' as http;
 
 class ReportWebDetailsScreen extends StatefulWidget {
   const ReportWebDetailsScreen({Key? key}) : super(key: key);
@@ -22,6 +23,8 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
   late WebViewService _webViewService;
   String selectedValue = '';
   List<String> availableDates = [];
+  bool isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -84,11 +87,7 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
                       _webViewController = webViewController;
                     },
                     onPageFinished: (_) async {
-                      await _webViewController.evaluateJavascript(javascriptHandler
-                          .getTestCommunications());
-                      final keyContext = heightKey.currentContext;
-                      await _webViewController.evaluateJavascript(javascriptHandler
-                          .getInitWebViewDimensionsFunction(keyContext!.size!.height));
+                      getReportDetails();
                     },
                   ),
                 ),
@@ -104,7 +103,21 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
         ),
       ),
     );
+  }
 
+  getReportDetails() async {
+    http.Response response = await http.get(Uri.parse(reportsEndPoint),);
+    EmbedReportEntity report = EmbedReportEntity().fromJson(json.decode(response.body));
+    await _webViewController.evaluateJavascript(
+        javascriptHandler.getEmbedPowerBi(
+            embedUrl: report.embedReport?.first.embedUrl??'',
+            reportId: report.embedReport?.first.reportId??'',
+            token: report.embedToken?.token??''
+        )
+    );
+    final keyContext = heightKey.currentContext;
+    await _webViewController.evaluateJavascript(javascriptHandler
+        .getInitWebViewDimensionsFunction(keyContext!.size!.height));
   }
 }
 
@@ -118,3 +131,5 @@ const String _jsSelectChannel = 'SelectChannel';
 const String _jsTranslateChannel = 'TranslateChannel';
 const String _jsSliderChannel = 'SliderChannel';
 const String _jsAnimationChannel = 'AnimationChannel';
+
+const String reportsEndPoint = 'https://wakecapfn.azurewebsites.net/api/EmbedReport?code=u9/tUFCUp8RxUHpmFP5AdBTF1y79JjMr4Db8M65Yy3EyR6oVmy7Utg==&report=63533d2b-824a-4427-95f3-a3327c8ab6e8&group=3e3a5a50-c664-4507-a1e5-4c97611e73cc';

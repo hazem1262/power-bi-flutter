@@ -3,9 +3,9 @@ import 'package:bower_bi/js/i_javascript_handler.dart';
 
 class JavascriptHandler implements IJavascriptHandler {
   @override
-  String getTestCommunications() {
+  String getEmbedPowerBi({required String embedUrl, required String reportId, required String token}) {
     return '''
-      testCommunications();
+      embedPowerBi("$embedUrl", "$reportId", "$token");
     ''';
   }
 
