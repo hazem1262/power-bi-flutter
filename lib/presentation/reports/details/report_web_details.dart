@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bower_bi/data/embed_report_entity.dart';
+import 'package:bower_bi/data/report_pages_entity.dart';
 import 'package:bower_bi/js/bundle_handler.dart';
 import 'package:bower_bi/js/html_handler.dart';
 import 'package:bower_bi/js/i_javascript_handler.dart';
@@ -9,6 +10,7 @@ import 'package:bower_bi/js/web_view_service.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:multiselect/multiselect.dart';
 
 class ReportWebDetailsScreen extends StatefulWidget {
   const ReportWebDetailsScreen({Key? key}) : super(key: key);
@@ -22,7 +24,11 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
   final IJavascriptHandler javascriptHandler = JavascriptHandler();
   late WebViewService _webViewService;
   String selectedValue = '';
-  List<String> availableDates = [];
+  List<ReportPagesEntity> availablePages = [];
+  ReportPagesEntity? selectedPage;
+  List<ReportPagesPageVisuals> availableVisuals = [];
+
+
   bool isLoading = true;
 
   @override
@@ -44,19 +50,27 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
           builder: (context, snapshot) {
             return snapshot.hasData ? Column(
               children: [
-                DropdownButton<String>(
-                  value: selectedValue,
-                  onChanged: (newValue) {
-                    setState(() {
-                      selectedValue = newValue??'';
-                    });
+                DropdownButton<ReportPagesEntity>(
+                    value: selectedPage,
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedPage = newValue;
+                      });
+                    },
+                    items: availablePages.map(
+                            (ReportPagesEntity page) => DropdownMenuItem<ReportPagesEntity>(
+                            value: page,
+                            child: Text(page.pageName??'')
+                        )
+                    ).toList()
+                ),
+                DropDownMultiSelect(
+                  onChanged: (selectedValues){
+
                   },
-                  items: availableDates.map(
-                    (e) => DropdownMenuItem<String>(
-                        value: e,
-                        child: Text(e)
-                    )
-                  ).toList()
+                  options: availableVisuals.map((e) => e.visualName??'').toList(),
+                  selectedValues: availableVisuals.where((element) => element.isSelected).map((e) => e.visualName??'').toList(),
+                  whenEmpty: 'Select Visual',
                 ),
                 Expanded(
                   key: heightKey,
@@ -73,12 +87,10 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
                       JavascriptChannel(
                         name: _jsVisualDataChannel,
                         onMessageReceived: (JavascriptMessage msg) {
-                          var visualData = json.decode(msg.message);
-                          List<String> dates = visualData["data"].split("\r\n");
-                          setState(() {
-                            availableDates = dates;
-                          });
-                          print(visualData);
+                          var reportPages = json.decode(msg.message);
+                          List<ReportPagesEntity> pages = (reportPages as List).map((p) => ReportPagesEntity().fromJson(p)).toList();
+                          initializePages(pages);
+                          print(msg.message);
                         }
                       )
                     },
@@ -119,6 +131,15 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
     await _webViewController.evaluateJavascript(javascriptHandler
         .getInitWebViewDimensionsFunction(keyContext!.size!.height));
   }
+
+  void initializePages(List<ReportPagesEntity> pages) {
+    setState(() {
+      selectedPage = pages.first;
+      availableVisuals = selectedPage?.pageVisuals??[];
+      availablePages = pages;
+    });
+  }
+
 }
 
 const String _jsDebugChannel = 'DebugChannel';
