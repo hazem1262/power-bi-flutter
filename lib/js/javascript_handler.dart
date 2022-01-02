@@ -24,9 +24,9 @@ class JavascriptHandler implements IJavascriptHandler {
   }
 
   @override
-  String getUpdatePageVisuals(String visualId, bool isVisible) {
+  String getUpdatePageVisuals(String pageId, String visualId, bool isVisible) {
     return '''
-    getVisualsData("$visualId", $isVisible);
+    showHideVisual("$pageId", "$visualId", $isVisible);
   ''';
   }
 

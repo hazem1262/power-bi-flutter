@@ -3,5 +3,5 @@ abstract class IJavascriptHandler {
   String getInitWebViewDimensionsFunction(double height);
   String getVisualsData(String pageName, String visualName);
   String getUpdateVisiblePage(String pageId);
-  String getUpdatePageVisuals(String visualId, bool isVisible);
+  String getUpdatePageVisuals(String pageId, String visualId, bool isVisible);
 }

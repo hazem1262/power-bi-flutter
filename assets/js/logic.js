@@ -110,6 +110,20 @@ function updatePage(pageId) {
     report.setPage(pageId);
 }
 
+async function showHideVisual(pageName, visualName, show) {
+    try {
+        DebugChannel.postMessage("active page name is: " + pageName);
+        DebugChannel.postMessage("active page visual name is: " + visualName);
+        DebugChannel.postMessage("active page visual visibility is: " + show);
+        let page = await report.getPageByName(pageName);
+        DebugChannel.postMessage("active page is: " + page);
+        report.setVisualDisplayState(pageName, visualName, show?0:1);
+    } catch(e) {
+        DebugChannel.postMessage("update visual error");
+    }
+}
+
+
 async function getVisualsData(pageName, visualName) {
     DebugChannel.postMessage("Page Name: " + pageName);
     DebugChannel.postMessage("Page Visual: " + visualName);

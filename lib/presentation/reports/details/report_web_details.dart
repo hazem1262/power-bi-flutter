@@ -70,6 +70,12 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
                 ),
                 DropDownMultiSelect<ReportPagesPageVisuals>(
                   onChanged: (selectedValues){
+                    for (var element in availableVisuals) {
+                      element.isSelected = selectedValues.contains(element);
+                      _webViewController.evaluateJavascript(
+                          javascriptHandler.getUpdatePageVisuals(selectedPage?.pageId??'', element.visualId??'', element.isSelected)
+                      );
+                    }
                     print("selected values: $selectedValues");
                   },
                   options: availableVisuals,
