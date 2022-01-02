@@ -22,4 +22,18 @@ class JavascriptHandler implements IJavascriptHandler {
     getVisualsData("$pageName", "$visualName");
   ''';
   }
+
+  @override
+  String getUpdatePageVisuals(String visualId, bool isVisible) {
+    return '''
+    getVisualsData("$visualId", $isVisible);
+  ''';
+  }
+
+  @override
+  String getUpdateVisiblePage(String pageId) {
+    return '''
+    updatePage("$pageId");
+  ''';
+  }
 }

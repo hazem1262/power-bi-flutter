@@ -106,6 +106,10 @@ async function exposeData() {
 
 }
 
+function updatePage(pageId) {
+    report.setPage(pageId);
+}
+
 async function getVisualsData(pageName, visualName) {
     DebugChannel.postMessage("Page Name: " + pageName);
     DebugChannel.postMessage("Page Visual: " + visualName);
