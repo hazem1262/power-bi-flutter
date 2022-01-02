@@ -7,10 +7,10 @@ import 'package:bower_bi/js/i_javascript_handler.dart';
 import 'package:bower_bi/js/javascript_handler.dart';
 import 'package:bower_bi/js/local_storage_handler.dart';
 import 'package:bower_bi/js/web_view_service.dart';
+import 'package:bower_bi/utils/custom_multiselect.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:multiselect/multiselect.dart';
 
 class ReportWebDetailsScreen extends StatefulWidget {
   const ReportWebDetailsScreen({Key? key}) : super(key: key);
@@ -55,6 +55,10 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
                     onChanged: (newValue) {
                       setState(() {
                         selectedPage = newValue;
+                        availableVisuals = selectedPage?.pageVisuals??[];
+                        _webViewController.evaluateJavascript(
+                            javascriptHandler.getUpdateVisiblePage(selectedPage?.pageId??'')
+                        );
                       });
                     },
                     items: availablePages.map(
@@ -64,16 +68,16 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
                         )
                     ).toList()
                 ),
-                DropDownMultiSelect(
+                DropDownMultiSelect<ReportPagesPageVisuals>(
                   onChanged: (selectedValues){
-
+                    print("selected values: $selectedValues");
                   },
-                  options: availableVisuals.map((e) => e.visualName??'').toList(),
-                  selectedValues: availableVisuals.where((element) => element.isSelected).map((e) => e.visualName??'').toList(),
+                  options: availableVisuals,
+                  selectedValues: availableVisuals.where((element) => element.isSelected).toList(),
                   whenEmpty: 'Select Visual',
                 ),
-                Expanded(
-                  key: heightKey,
+                SizedBox(
+                  height: 100,
                   child: WebView(
                     initialUrl: _webViewService.uri.toString(),
                     javascriptMode: JavascriptMode.unrestricted,
@@ -107,12 +111,6 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
             ): const Center(child: CircularProgressIndicator());
           }
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            await _webViewController.evaluateJavascript(javascriptHandler
-                .getVisualsData("ReportSectiondab2fb566641af96da92", "0d3836c206909c0ca001"));
-          },
-        ),
       ),
     );
   }
@@ -127,9 +125,9 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
             token: report.embedToken?.token??''
         )
     );
-    final keyContext = heightKey.currentContext;
+    /*final keyContext = heightKey.currentContext;
     await _webViewController.evaluateJavascript(javascriptHandler
-        .getInitWebViewDimensionsFunction(keyContext!.size!.height));
+        .getInitWebViewDimensionsFunction(keyContext!.size!.height));*/
   }
 
   void initializePages(List<ReportPagesEntity> pages) {

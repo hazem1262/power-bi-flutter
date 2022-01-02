@@ -12,4 +12,9 @@ class ReportPagesPageVisuals with JsonConvert<ReportPagesPageVisuals> {
 	String? visualData;
 
 	bool isSelected = true;
+
+	@override
+  String toString() {
+		return (visualName?.isEmpty?? true) ? visualId! : visualName!;
+  }
 }
