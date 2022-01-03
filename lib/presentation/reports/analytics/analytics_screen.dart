@@ -12,14 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
 
-class ReportWebDetailsScreen extends StatefulWidget {
-  const ReportWebDetailsScreen({Key? key}) : super(key: key);
+class AnalyticsScreen extends StatefulWidget {
+  const AnalyticsScreen({Key? key}) : super(key: key);
 
   @override
-  _ReportWebDetailsScreenState createState() => _ReportWebDetailsScreenState();
+  _AnalyticsScreenState createState() => _AnalyticsScreenState();
 }
 
-class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
+class _AnalyticsScreenState extends State<AnalyticsScreen> {
   late WebViewController _webViewController;
   final IJavascriptHandler javascriptHandler = JavascriptHandler();
   late WebViewService _webViewService;

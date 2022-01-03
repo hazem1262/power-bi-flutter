@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:bower_bi/presentation/reports/details/report_web_details.dart';
+import 'package:bower_bi/presentation/reports/analytics/analytics_screen.dart';
 import 'package:bower_bi/presentation/reports/list/reports_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const ReportWebDetailsScreen(),
+      home: const AnalyticsScreen(),
     );
   }
 }

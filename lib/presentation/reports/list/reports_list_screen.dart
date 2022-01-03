@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:bower_bi/main.dart';
 import 'package:bower_bi/presentation/reports/details/report_details_screen.dart';
-import 'package:bower_bi/presentation/reports/details/report_web_details.dart';
+import 'package:bower_bi/presentation/reports/analytics/analytics_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bower_bi/data/report_entity.dart';
 import 'package:http/http.dart' as http;
@@ -43,7 +43,7 @@ class _ReportsListScreenState extends State<ReportsListScreen> {
               child: ListTile(
                 title: Text(report.name??''),
                 onTap: (){
-                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => const ReportWebDetailsScreen(), settings: RouteSettings(arguments: report)));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => const AnalyticsScreen(), settings: RouteSettings(arguments: report)));
                 },
               ),
             );
