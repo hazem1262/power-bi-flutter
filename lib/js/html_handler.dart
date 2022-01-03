@@ -13,7 +13,7 @@ class HtmlHandler implements IHtmlHandler {
           <style>
             .$powerBiEmbededDivision {
               width: 100%;
-              height: 300px;
+              height: 100%;
             }
           </style>
           <script src="$jqueryPath"></script>

@@ -91,22 +91,20 @@ class _DropDownMultiSelectState<T> extends State<DropDownMultiSelect<T>> {
         children: [
           _theState.rebuilder(() => widget.childBuilder != null
               ? widget.childBuilder!(widget.selectedValues)
-              : Align(
+              : const Align(
                   child: Padding(
                       padding:
-                          EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                          EdgeInsets.symmetric(vertical: 20, horizontal: 10),
                       child: Text('Choose Visuals')),
                   alignment: Alignment.centerLeft)),
           Align(
             alignment: Alignment.centerLeft,
             child: DropdownButtonFormField<T>(
-              decoration: widget.decoration != null
-                  ? widget.decoration
-                  : InputDecoration(
+              decoration: widget.decoration ?? const InputDecoration(
                       border: OutlineInputBorder(),
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(
-                        vertical: 15,
+                        vertical: 20,
                         horizontal: 10,
                       ),
                     ),

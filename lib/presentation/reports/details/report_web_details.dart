@@ -50,41 +50,57 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
           builder: (context, snapshot) {
             return snapshot.hasData ? Column(
               children: [
-                DropdownButton<ReportPagesEntity>(
-                    value: selectedPage,
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedPage = newValue;
-                        availableVisuals = selectedPage?.pageVisuals??[];
-                        _webViewController.evaluateJavascript(
-                            javascriptHandler.getUpdateVisiblePage(selectedPage?.pageId??'')
-                        );
-                      });
-                    },
-                    items: availablePages.map(
-                            (ReportPagesEntity page) => DropdownMenuItem<ReportPagesEntity>(
-                            value: page,
-                            child: Text(page.pageName??'')
-                        )
-                    ).toList()
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<ReportPagesEntity>(
+                            value: selectedPage,
+                            isExpanded: true,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedPage = newValue;
+                                availableVisuals = selectedPage?.pageVisuals??[];
+                                _webViewController.evaluateJavascript(
+                                    javascriptHandler.getUpdateVisiblePage(selectedPage?.pageId??'')
+                                );
+                              });
+                            },
+                            items: availablePages.map(
+                                    (ReportPagesEntity page) => DropdownMenuItem<ReportPagesEntity>(
+                                    value: page,
+                                    child: Text(page.pageName??'', overflow: TextOverflow.ellipsis,)
+                                )
+                            ).toList()
+                        ),
+                      ),
+                      const SizedBox(width: 10,),
+                      Expanded(
+                        child: DropDownMultiSelect<ReportPagesPageVisuals>(
+                          onChanged: (selectedValues){
+                            for (var element in availableVisuals) {
+                              element.isSelected = selectedValues.contains(element);
+                              _webViewController.evaluateJavascript(
+                                  javascriptHandler.getUpdatePageVisuals(selectedPage?.pageId??'', element.visualId??'', element.isSelected)
+                              );
+                            }
+                            print("selected values: $selectedValues");
+                          },
+                          options: availableVisuals,
+                          selectedValues: availableVisuals.where((element) => element.isSelected).toList(),
+                          whenEmpty: 'Select Visual',
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                DropDownMultiSelect<ReportPagesPageVisuals>(
-                  onChanged: (selectedValues){
-                    for (var element in availableVisuals) {
-                      element.isSelected = selectedValues.contains(element);
-                      _webViewController.evaluateJavascript(
-                          javascriptHandler.getUpdatePageVisuals(selectedPage?.pageId??'', element.visualId??'', element.isSelected)
-                      );
-                    }
-                    print("selected values: $selectedValues");
-                  },
-                  options: availableVisuals,
-                  selectedValues: availableVisuals.where((element) => element.isSelected).toList(),
-                  whenEmpty: 'Select Visual',
-                ),
-                SizedBox(
-                  height: 100,
+                Expanded(
                   child: WebView(
+                    key: heightKey,
                     initialUrl: _webViewService.uri.toString(),
                     javascriptMode: JavascriptMode.unrestricted,
                     javascriptChannels: {
@@ -131,9 +147,9 @@ class _ReportWebDetailsScreenState extends State<ReportWebDetailsScreen> {
             token: report.embedToken?.token??''
         )
     );
-    /*final keyContext = heightKey.currentContext;
+    final keyContext = heightKey.currentContext;
     await _webViewController.evaluateJavascript(javascriptHandler
-        .getInitWebViewDimensionsFunction(keyContext!.size!.height));*/
+        .getInitWebViewDimensionsFunction(keyContext!.size!.height));
   }
 
   void initializePages(List<ReportPagesEntity> pages) {

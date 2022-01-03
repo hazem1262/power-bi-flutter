@@ -27,7 +27,7 @@ function embedPowerBi(embedUrl, embedReportId, accessToken) {
         settings: {
             panes: {
                 filters: {
-                    visible: true
+                    visible: false
                 },
                 pageNavigation: {
                     visible: false
