@@ -39,6 +39,7 @@ dependencies:
   path_provider: ^2.0.8
   webview_flutter: ^3.0.0
   multiselect: ^0.0.4
+  pluto_grid: ^2.8.0
 
 dev_dependencies:
   flutter_test:
