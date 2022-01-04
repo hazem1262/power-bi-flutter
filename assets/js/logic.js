@@ -25,6 +25,7 @@ function embedPowerBi(embedUrl, embedReportId, accessToken) {
         id: embedReportId,
         permissions: permissions,
         settings: {
+            layoutType: models.LayoutType.MobilePortrait,
             panes: {
                 filters: {
                     visible: false
