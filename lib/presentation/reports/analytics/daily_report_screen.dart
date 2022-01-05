@@ -1,5 +1,16 @@
+import 'dart:convert';
+import 'package:bower_bi/data/embed_report_entity.dart';
+import 'package:bower_bi/data/report_pages_entity.dart';
+import 'package:bower_bi/js/bundle_handler.dart';
+import 'package:bower_bi/js/html_handler.dart';
+import 'package:bower_bi/js/i_javascript_handler.dart';
+import 'package:bower_bi/js/javascript_handler.dart';
+import 'package:bower_bi/js/local_storage_handler.dart';
+import 'package:bower_bi/js/web_view_service.dart';
+import 'package:bower_bi/utils/custom_multiselect.dart';
 import 'package:flutter/material.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:http/http.dart' as http;
 
 class DailyReportScreen extends StatefulWidget {
   const DailyReportScreen({Key? key}) : super(key: key);
@@ -10,91 +21,146 @@ class DailyReportScreen extends StatefulWidget {
 
 class _DailyReportScreenState extends State<DailyReportScreen> {
 
-  List<PlutoColumn> columns = [
-    /// Text Column definition
-    PlutoColumn(
-      title: 'text column',
-      field: 'text_field',
-      type: PlutoColumnType.text(),
-    ),
-    /// Number Column definition
-    PlutoColumn(
-      title: 'number column',
-      field: 'number_field',
-      type: PlutoColumnType.number(),
-    ),
-    /// Select Column definition
-    PlutoColumn(
-      title: 'select column',
-      field: 'select_field',
-      type: PlutoColumnType.select(['item1', 'item2', 'item3']),
-    ),
-    /// Datetime Column definition
-    PlutoColumn(
-      title: 'date column',
-      field: 'date_field',
-      type: PlutoColumnType.date(),
-    ),
-    /// Time Column definition
-    PlutoColumn(
-      title: 'time column',
-      field: 'time_field',
-      type: PlutoColumnType.time(),
-    ),
-  ];
-
-  List<PlutoRow> rows = [
-    PlutoRow(
-      cells: {
-        'text_field': PlutoCell(value: 'Text cell value1'),
-        'number_field': PlutoCell(value: 2020),
-        'select_field': PlutoCell(value: 'item1'),
-        'date_field': PlutoCell(value: '2020-08-06'),
-        'time_field': PlutoCell(value: '12:30'),
-      },
-    ),
-    PlutoRow(
-      cells: {
-        'text_field': PlutoCell(value: 'Text cell value2'),
-        'number_field': PlutoCell(value: 2021),
-        'select_field': PlutoCell(value: 'item2'),
-        'date_field': PlutoCell(value: '2020-08-07'),
-        'time_field': PlutoCell(value: '18:45'),
-      },
-    ),
-    PlutoRow(
-      cells: {
-        'text_field': PlutoCell(value: 'Text cell value3'),
-        'number_field': PlutoCell(value: 2022),
-        'select_field': PlutoCell(value: 'item3'),
-        'date_field': PlutoCell(value: '2020-08-08'),
-        'time_field': PlutoCell(value: '23:59'),
-      },
-    ),
-  ];
+  late WebViewController _webViewController;
+  final IJavascriptHandler javascriptHandler = JavascriptHandler();
+  late WebViewService _webViewService;
+  String selectedValue = '';
+  List<ReportPagesEntity> availablePages = [];
+  ReportPagesEntity? selectedPage;
+  List<ReportPagesPageVisuals> availableVisuals = [];
+  bool isLoading = true;
+  List<String> dates = [];
 
   @override
+  void initState() {
+    super.initState();
+    _webViewService = WebViewService(
+        localStorageHandler: LocalStorageHandler(),
+        bundleHandler: BundleHandler(),
+        htmlHandler: HtmlHandler()
+    );
+  }
+
+  final GlobalKey heightKey = GlobalKey();
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('PlutoGrid Demo'),
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(30),
-        child: PlutoGrid(
-          columns: columns,
-          rows: rows,
-          mode: PlutoGridMode.select,
-          configuration: PlutoGridConfiguration(
-          ),
-          onChanged: (PlutoGridOnChangedEvent event) {
-            print(event);
-          },
-          onLoaded: (PlutoGridOnLoadedEvent event) {
-            print(event);
+    return SafeArea(
+      child: Scaffold(
+        body: FutureBuilder(
+          future: _webViewService.initWebViewUri(),
+          builder: (context, snapshot) {
+            return snapshot.hasData ? Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<ReportPagesEntity>(
+                            value: selectedPage,
+                            isExpanded: true,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedPage = newValue;
+                                availableVisuals = selectedPage?.pageVisuals??[];
+                                _webViewController.evaluateJavascript(
+                                    javascriptHandler.getUpdateVisiblePage(selectedPage?.pageId??'')
+                                );
+                              });
+                            },
+                            items: availablePages.map(
+                                    (ReportPagesEntity page) => DropdownMenuItem<ReportPagesEntity>(
+                                    value: page,
+                                    child: Text(page.pageName??'', overflow: TextOverflow.ellipsis,)
+                                )
+                            ).toList()
+                        ),
+                      ),
+                      const SizedBox(width: 10,),
+                      Expanded(
+                        child: DropDownMultiSelect<ReportPagesPageVisuals>(
+                          onChanged: (selectedValues){
+                            for (var element in availableVisuals) {
+                              element.isSelected = selectedValues.contains(element);
+                              _webViewController.evaluateJavascript(
+                                  javascriptHandler.getUpdatePageVisuals(selectedPage?.pageId??'', element.visualId??'', element.isSelected)
+                              );
+                            }
+                            print("selected values: $selectedValues");
+                          },
+                          options: availableVisuals,
+                          selectedValues: availableVisuals.where((element) => element.isSelected).toList(),
+                          whenEmpty: 'Select Visual',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: WebView(
+                    key: heightKey,
+                    initialUrl: _webViewService.uri.toString(),
+                    javascriptMode: JavascriptMode.unrestricted,
+                    javascriptChannels: {
+                      JavascriptChannel(
+                          name: _jsDebugChannel,
+                          onMessageReceived: (JavascriptMessage msg) {
+                            print(msg.message);
+                          }
+                      ),
+                      JavascriptChannel(
+                          name: _jsVisualDataChannel,
+                          onMessageReceived: (JavascriptMessage msg) {
+                            var reportPages = json.decode(msg.message);
+                            List<ReportPagesEntity> pages = (reportPages as List).map((p) => ReportPagesEntity().fromJson(p)).toList();
+                            initializePages(pages);
+                            print(msg.message);
+                          }
+                      )
+                    },
+                    onWebViewCreated:
+                        (WebViewController webViewController) {
+                      _webViewController = webViewController;
+                    },
+                    onPageFinished: (_) async {
+                      getReportDetails();
+                    },
+                  ),
+                ),
+              ],
+            ): const Center(child: CircularProgressIndicator());
           }
         ),
       ),
     );
   }
+
+  getReportDetails() async {
+    http.Response response = await http.get(Uri.parse(reportsEndPoint),);
+    EmbedReportEntity report = EmbedReportEntity().fromJson(json.decode(response.body));
+    await _webViewController.evaluateJavascript(
+        javascriptHandler.getEmbedPowerBi(
+            embedUrl: report.embedReport?.first.embedUrl??'',
+            reportId: report.embedReport?.first.reportId??'',
+            token: report.embedToken?.token??''
+        )
+    );
+    final keyContext = heightKey.currentContext;
+    await _webViewController.evaluateJavascript(javascriptHandler
+        .getInitWebViewDimensionsFunction(keyContext!.size!.height));
+  }
+
+  void initializePages(List<ReportPagesEntity> pages) {
+    setState(() {
+      selectedPage = pages.first;
+      availableVisuals = selectedPage?.pageVisuals??[];
+      availablePages = pages;
+    });
+  }
 }
+const String _jsDebugChannel = 'DebugChannel';
+const String _jsVisualDataChannel = 'VisualDataChannel';
+const String reportsEndPoint = 'https://wakecapfn.azurewebsites.net/api/EmbedReport?code=u9/tUFCUp8RxUHpmFP5AdBTF1y79JjMr4Db8M65Yy3EyR6oVmy7Utg==&report=63533d2b-824a-4427-95f3-a3327c8ab6e8&group=3e3a5a50-c664-4507-a1e5-4c97611e73cc';

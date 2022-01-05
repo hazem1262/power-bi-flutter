@@ -28,7 +28,7 @@ class _SelectRow extends StatelessWidget {
               onChange(x!);
               _theState.notify();
             }),
-        Text(text)
+        Text(text, overflow: TextOverflow.ellipsis)
       ],
     );
   }

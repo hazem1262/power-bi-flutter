@@ -27,8 +27,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   List<ReportPagesEntity> availablePages = [];
   ReportPagesEntity? selectedPage;
   List<ReportPagesPageVisuals> availableVisuals = [];
-
-
   bool isLoading = true;
 
   @override
@@ -165,12 +163,5 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 const String _jsDebugChannel = 'DebugChannel';
 const String _jsVisualDataChannel = 'VisualDataChannel';
 
-const String _jsErrorChannel = 'ErrorChannel';
-const String _jsInteractChannel = 'InteractChannel';
-const String _jsCreateChannel = 'CreateChannel';
-const String _jsSelectChannel = 'SelectChannel';
-const String _jsTranslateChannel = 'TranslateChannel';
-const String _jsSliderChannel = 'SliderChannel';
-const String _jsAnimationChannel = 'AnimationChannel';
 
 const String reportsEndPoint = 'https://wakecapfn.azurewebsites.net/api/EmbedReport?code=u9/tUFCUp8RxUHpmFP5AdBTF1y79JjMr4Db8M65Yy3EyR6oVmy7Utg==&report=63533d2b-824a-4427-95f3-a3327c8ab6e8&group=3e3a5a50-c664-4507-a1e5-4c97611e73cc';
