@@ -88,7 +88,7 @@ async function exposeData() {
             log += "\n" + visuals[j].name + " - " + visuals[j].title;
             let resultPageVisual = {"visualId":visuals[j].name, "visualName":visuals[j].title}
             try {
-                let result = await visuals[j].exportData(models.ExportDataType.Summarized, 2);
+                let result = await visuals[j].exportData(models.ExportDataType.Summarized, 100);
                 log += "\n" + "Visual data:";
                 log += "\n" + result.data;
                 resultPageVisual.visualData = result.data;

@@ -30,7 +30,11 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
   List<ReportPagesPageVisuals> availableVisuals = [];
   bool isLoading = true;
   List<String> dates = [];
-
+  String selectedDate = '';
+  String? inActiveWorkers;
+  String? activeWorkers;
+  String? offLineWorkers;
+  String? activeVsExpected;
   @override
   void initState() {
     super.initState();
@@ -99,35 +103,65 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                     ],
                   ),
                 ),
+                DropdownButtonFormField<String>(
+                    value: selectedDate,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedDate = newValue??'';
+                        // availableVisuals = selectedPage?.pageVisuals??[];
+                        /*_webViewController.evaluateJavascript(
+                            javascriptHandler.getUpdateVisiblePage(selectedPage?.pageId??'')
+                        );*/
+                      });
+                    },
+                    items: dates.map(
+                            (String date) => DropdownMenuItem<String>(
+                            value: date,
+                            child: Text(date, overflow: TextOverflow.ellipsis,)
+                        )
+                    ).toList()
+                ),
+                Text('Active Workers: $activeWorkers'),
+                Text('inActive Workers: $inActiveWorkers'),
+                Text('offline Workers: $offLineWorkers'),
+                Text('active/Expected Workers: $activeVsExpected'),
+                // Text('Total Workers: ${int.parse(offLineWorkers??'0') + int.parse(activeWorkers??'0') + int.parse(inActiveWorkers??'0') }'),
                 Expanded(
-                  child: WebView(
-                    key: heightKey,
-                    initialUrl: _webViewService.uri.toString(),
-                    javascriptMode: JavascriptMode.unrestricted,
-                    javascriptChannels: {
-                      JavascriptChannel(
-                          name: _jsDebugChannel,
-                          onMessageReceived: (JavascriptMessage msg) {
-                            print(msg.message);
-                          }
-                      ),
-                      JavascriptChannel(
-                          name: _jsVisualDataChannel,
-                          onMessageReceived: (JavascriptMessage msg) {
-                            var reportPages = json.decode(msg.message);
-                            List<ReportPagesEntity> pages = (reportPages as List).map((p) => ReportPagesEntity().fromJson(p)).toList();
-                            initializePages(pages);
-                            print(msg.message);
-                          }
-                      )
-                    },
-                    onWebViewCreated:
-                        (WebViewController webViewController) {
-                      _webViewController = webViewController;
-                    },
-                    onPageFinished: (_) async {
-                      getReportDetails();
-                    },
+                  child: Opacity(
+                    opacity: 0,
+                    child: WebView(
+                      key: heightKey,
+                      initialUrl: _webViewService.uri.toString(),
+                      javascriptMode: JavascriptMode.unrestricted,
+                      javascriptChannels: {
+                        JavascriptChannel(
+                            name: _jsDebugChannel,
+                            onMessageReceived: (JavascriptMessage msg) {
+                              print(msg.message);
+                            }
+                        ),
+                        JavascriptChannel(
+                            name: _jsVisualDataChannel,
+                            onMessageReceived: (JavascriptMessage msg) {
+                              var reportPages = json.decode(msg.message);
+                              List<ReportPagesEntity> pages = (reportPages as List).map((p) => ReportPagesEntity().fromJson(p)).toList();
+                              initializePages(pages);
+                              print(msg.message);
+                            }
+                        )
+                      },
+                      onWebViewCreated:
+                          (WebViewController webViewController) {
+                        _webViewController = webViewController;
+                      },
+                      onPageFinished: (_) async {
+                        getReportDetails();
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -158,6 +192,13 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
       selectedPage = pages.first;
       availableVisuals = selectedPage?.pageVisuals??[];
       availablePages = pages;
+      ReportPagesPageVisuals visual = pages[0].pageVisuals![8];
+      dates = visual.visualData?.split('\r\n')??[];
+      inActiveWorkers  = pages[0].pageVisuals![3].visualData;
+      activeWorkers    = pages[0].pageVisuals![5].visualData;
+      offLineWorkers   = pages[0].pageVisuals![9].visualData;
+      activeVsExpected = pages[0].pageVisuals![4].visualData;
+
     });
   }
 }
