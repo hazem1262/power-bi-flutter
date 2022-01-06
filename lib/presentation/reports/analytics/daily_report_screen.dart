@@ -11,6 +11,8 @@ import 'package:bower_bi/utils/custom_multiselect.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 
 class DailyReportScreen extends StatefulWidget {
   const DailyReportScreen({Key? key}) : super(key: key);
@@ -21,6 +23,7 @@ class DailyReportScreen extends StatefulWidget {
 
 class _DailyReportScreenState extends State<DailyReportScreen> {
 
+  List<GDPData>? activeVsInactiveData;
   late WebViewController _webViewController;
   final IJavascriptHandler javascriptHandler = JavascriptHandler();
   late WebViewService _webViewService;
@@ -35,6 +38,7 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
   String? activeWorkers;
   String? offLineWorkers;
   String? activeVsExpected;
+  String? totalWorkers;
   @override
   void initState() {
     super.initState();
@@ -48,6 +52,7 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
   final GlobalKey heightKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
+    print('visual data: ${selectedPage?.pageVisuals![9].visualData}');
     return SafeArea(
       child: Scaffold(
         body: FutureBuilder(
@@ -55,82 +60,80 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
           builder: (context, snapshot) {
             return snapshot.hasData ? Column(
               children: [
+                SizedBox(height: 50,),
+                const FlutterLogo(size: 60,),
+                const Text('Wakecap', style: TextStyle(fontSize: 24),),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField<ReportPagesEntity>(
-                            value: selectedPage,
-                            isExpanded: true,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedPage = newValue;
-                                availableVisuals = selectedPage?.pageVisuals??[];
-                                _webViewController.evaluateJavascript(
-                                    javascriptHandler.getUpdateVisiblePage(selectedPage?.pageId??'')
-                                );
-                              });
-                            },
-                            items: availablePages.map(
-                                    (ReportPagesEntity page) => DropdownMenuItem<ReportPagesEntity>(
-                                    value: page,
-                                    child: Text(page.pageName??'', overflow: TextOverflow.ellipsis,)
-                                )
-                            ).toList()
-                        ),
+                  padding: const EdgeInsets.all(16.0),
+                  child: DropdownButtonFormField<String>(
+                      value: selectedDate,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
                       ),
-                      const SizedBox(width: 10,),
-                      Expanded(
-                        child: DropDownMultiSelect<ReportPagesPageVisuals>(
-                          onChanged: (selectedValues){
-                            for (var element in availableVisuals) {
-                              element.isSelected = selectedValues.contains(element);
-                              _webViewController.evaluateJavascript(
-                                  javascriptHandler.getUpdatePageVisuals(selectedPage?.pageId??'', element.visualId??'', element.isSelected)
-                              );
-                            }
-                            print("selected values: $selectedValues");
-                          },
-                          options: availableVisuals,
-                          selectedValues: availableVisuals.where((element) => element.isSelected).toList(),
-                          whenEmpty: 'Select Visual',
-                        ),
-                      ),
-                    ],
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedDate = newValue??'';
+                          // availableVisuals = selectedPage?.pageVisuals??[];
+                          /*_webViewController.evaluateJavascript(
+                              javascriptHandler.getUpdateVisiblePage(selectedPage?.pageId??'')
+                          );*/
+                        });
+                      },
+                      items: dates.map(
+                              (String date) => DropdownMenuItem<String>(
+                              value: date,
+                              child: Text(date, overflow: TextOverflow.ellipsis,)
+                          )
+                      ).toList()
                   ),
                 ),
-                DropdownButtonFormField<String>(
-                    value: selectedDate,
-                    isExpanded: true,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedDate = newValue??'';
-                        // availableVisuals = selectedPage?.pageVisuals??[];
-                        /*_webViewController.evaluateJavascript(
-                            javascriptHandler.getUpdateVisiblePage(selectedPage?.pageId??'')
-                        );*/
-                      });
-                    },
-                    items: dates.map(
-                            (String date) => DropdownMenuItem<String>(
-                            value: date,
-                            child: Text(date, overflow: TextOverflow.ellipsis,)
-                        )
-                    ).toList()
+                if(activeVsInactiveData != null) SfCircularChart(
+                  title: ChartTitle(text: 'Active Vs Expected Workers'),
+                  series: <CircularSeries>[
+                    RadialBarSeries<GDPData, String>(
+                      maximumValue: double.parse(activeVsExpected?.split(',')[1]??'0'),
+                      dataLabelSettings: const DataLabelSettings(isVisible: true, angle: 90,),
+                      enableTooltip: true,
+                      dataSource: activeVsInactiveData,
+                      xValueMapper: (data, _) => data.continent,
+                      yValueMapper: (data, _) =>  data.gdp
+                    )
+                  ],
                 ),
-                Text('Active Workers: $activeWorkers'),
-                Text('inActive Workers: $inActiveWorkers'),
-                Text('offline Workers: $offLineWorkers'),
-                Text('active/Expected Workers: $activeVsExpected'),
-                // Text('Total Workers: ${int.parse(offLineWorkers??'0') + int.parse(activeWorkers??'0') + int.parse(inActiveWorkers??'0') }'),
-                Expanded(
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(activeWorkers??'', style: TextStyle(color: Colors.greenAccent, fontSize: 18),),
+                          Text('Active', style: TextStyle(color: Colors.greenAccent, fontSize: 18)),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(inActiveWorkers??'', style: TextStyle(color: Colors.orangeAccent, fontSize: 18)),
+                          Text('Inactive', style: TextStyle(color: Colors.orangeAccent, fontSize: 18)),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(offLineWorkers??'', style: TextStyle(color: Colors.redAccent, fontSize: 18)),
+                          Text('Offline', style: TextStyle(color: Colors.redAccent, fontSize: 18)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(),
+                Text(totalWorkers??'', style: TextStyle(color: Colors.black, fontSize: 22)),
+                Text('Total Workers', style: TextStyle(color: Colors.black, fontSize: 22)),
+                Container(
+                  height: 50,
                   child: Opacity(
                     opacity: 0,
                     child: WebView(
@@ -192,16 +195,45 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
       selectedPage = pages.first;
       availableVisuals = selectedPage?.pageVisuals??[];
       availablePages = pages;
-      ReportPagesPageVisuals visual = pages[0].pageVisuals![8];
-      dates = visual.visualData?.split('\r\n')??[];
-      inActiveWorkers  = pages[0].pageVisuals![3].visualData;
-      activeWorkers    = pages[0].pageVisuals![5].visualData;
-      offLineWorkers   = pages[0].pageVisuals![9].visualData;
-      activeVsExpected = pages[0].pageVisuals![4].visualData;
-
+      List<ReportPagesPageVisuals> dailyReportVisuals = pages[0].pageVisuals!;
+      dates = getVisualDataList(visualData: dailyReportVisuals, visualTitle: 'Date Shift\r\n');
+      activeWorkers    = getVisualData(visualData: dailyReportVisuals, visualTitle: 'Active\r\n');
+      inActiveWorkers  = getVisualData(visualData: dailyReportVisuals, visualTitle: 'Inactive\r\n');
+      offLineWorkers   = getVisualData(visualData: dailyReportVisuals, visualTitle: 'Offline\r\n');
+      activeVsExpected = getVisualData(visualData: dailyReportVisuals, visualTitle: 'Shift Hours Active,Expected Shift Hours\r\n');
+      activeVsInactiveData = [
+        GDPData('Active Hours', double.parse(activeVsExpected?.split(',').first??'0').toInt())
+      ];
+      totalWorkers     = getVisualData(visualData: dailyReportVisuals, visualTitle: 'Total Workers\r\n');
     });
+  }
+}
+
+String getVisualData({required List<ReportPagesPageVisuals> visualData, required String visualTitle}) {
+  try {
+    ReportPagesPageVisuals visual = visualData.where((element) => element.visualData?.contains(visualTitle)??false).toList().first;
+    return visual.visualData?.split('\r\n')[1]??'';
+  } catch(e){
+    return '';
+  }
+}
+
+List<String> getVisualDataList({required List<ReportPagesPageVisuals> visualData, required String visualTitle}) {
+  try {
+    ReportPagesPageVisuals visual = visualData.where((element) => element.visualData?.contains(visualTitle)??false).toList().first;
+    return (visual.visualData?.split('\r\n')??[])..remove(visualTitle);
+  } catch(e){
+    return [];
   }
 }
 const String _jsDebugChannel = 'DebugChannel';
 const String _jsVisualDataChannel = 'VisualDataChannel';
 const String reportsEndPoint = 'https://wakecapfn.azurewebsites.net/api/EmbedReport?code=u9/tUFCUp8RxUHpmFP5AdBTF1y79JjMr4Db8M65Yy3EyR6oVmy7Utg==&report=63533d2b-824a-4427-95f3-a3327c8ab6e8&group=3e3a5a50-c664-4507-a1e5-4c97611e73cc';
+
+
+class GDPData {
+  final String continent;
+  final int gdp;
+
+  GDPData(this.continent, this.gdp);
+}
