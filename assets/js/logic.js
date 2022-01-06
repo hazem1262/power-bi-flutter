@@ -196,7 +196,7 @@ async function getVisualsData(pageName, visualName) {
 //    await report.updateFilters(models.FiltersOperations.ReplaceAll, [filter])
 }
 
-async function onVisualsDateChange(startDate, endDate)  {
+/*async function onVisualsDateChange(startDate, endDate)  {
 
     // Create the filter object. For more information see https://go.microsoft.com/fwlink/?linkid=2153364
     const filter = {
@@ -244,7 +244,7 @@ async function onVisualsDateChange(startDate, endDate)  {
     } catch (errors) {
       console.log(errors);
     }
-  };
+  }*/
 
 function addFilter() {
 
