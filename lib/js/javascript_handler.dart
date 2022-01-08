@@ -36,4 +36,11 @@ class JavascriptHandler implements IJavascriptHandler {
     updatePage("$pageId");
   ''';
   }
+
+  @override
+  String getOnVisualsDateChange(String startDate, String endDate, String pageId, String visualId) {
+    return '''
+    onVisualsDateChange("$startDate", "$endDate", "$pageId", "$visualId");
+    ''';
+  }
 }

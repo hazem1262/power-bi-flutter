@@ -4,4 +4,5 @@ abstract class IJavascriptHandler {
   String getVisualsData(String pageName, String visualName);
   String getUpdateVisiblePage(String pageId);
   String getUpdatePageVisuals(String pageId, String visualId, bool isVisible);
+  String getOnVisualsDateChange(String startDate, String endDate, String pageId, String visualId);
 }

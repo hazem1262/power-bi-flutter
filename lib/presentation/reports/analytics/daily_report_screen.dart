@@ -74,6 +74,14 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                       onChanged: (String? newValue) {
                         setState(() {
                           selectedDate = newValue??'';
+                          _webViewController.evaluateJavascript(
+                              javascriptHandler.getOnVisualsDateChange(
+                                newValue??'',
+                                (newValue??'').replaceAll('00:00:00', '23:59:00'),
+                                selectedPage?.pageId??'',
+                                selectedPage?.pageVisuals?.where((element) => (element.visualData?.contains('Date Shift\r\n'))??false).toList().first.visualId??''
+                              )
+                          );
                           // availableVisuals = selectedPage?.pageVisuals??[];
                           /*_webViewController.evaluateJavascript(
                               javascriptHandler.getUpdateVisiblePage(selectedPage?.pageId??'')

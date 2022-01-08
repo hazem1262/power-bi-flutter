@@ -196,7 +196,7 @@ async function getVisualsData(pageName, visualName) {
 //    await report.updateFilters(models.FiltersOperations.ReplaceAll, [filter])
 }
 
-/*async function onVisualsDateChange(startDate, endDate)  {
+async function onVisualsDateChange(startDate, endDate, pageName, visualName)  {
 
     // Create the filter object. For more information see https://go.microsoft.com/fwlink/?linkid=2153364
     const filter = {
@@ -218,33 +218,23 @@ async function getVisualsData(pageName, visualName) {
         },
       ],
     };
-
-    // Retrieve the page collection and get the visuals for the active page.
+    DebugChannel.postMessage(startDate);
+    DebugChannel.postMessage(endDate);
+    DebugChannel.postMessage(pageName);
+    DebugChannel.postMessage(visualName);
+    let page = await report.getPageByName(pageName);
+    let visuals = await page.getVisuals();
+    const slicer = visuals.filter((visual) => {
+            return visual.type === 'slicer' && visual.title === 'Date';
+          })[0];
     try {
-      // @ts-ignore
-      // eslint-disable-next-line no-shadow
-      const pages = await MyReport?.getPages();
-      // Retrieve the active page.
-      // eslint-disable-next-line no-shadow
-      const page = pages.filter((page: any) => {
-        return page.isActive;
-      })[0];
-
-      const visuals = await page.getVisuals();
-
-      // Retrieve the target visual.
-      const slicer = visuals.filter((visual: any) => {
-        return visual.type === 'slicer' && visual.title === 'Date';
-      })[0];
-
-      // Set the slicer state which contains the slicer filters.
-      await slicer.setSlicerState({ filters: [filter] });
-      // await page.updateFilters(models.FiltersOperations.Add, [filter]);
-      // console.log('Page filter was added.');
-    } catch (errors) {
-      console.log(errors);
+        await slicer.setSlicerState({ filters: [filter] });
+        DebugChannel.postMessage("date filter Done");
+        exposeData();
+    } catch(e) {
+        DebugChannel.postMessage("date filter error:" + JSON.stringify(e));
     }
-  }*/
+  }
 
 function addFilter() {
 
