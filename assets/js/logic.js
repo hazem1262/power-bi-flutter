@@ -13,10 +13,7 @@ models = window['powerbi-client'].models;
 // Read more about how to embed a Power BI report in your application here: https://go.microsoft.com/fwlink/?linkid=2153590
 function embedPowerBi(embedUrl, embedReportId, accessToken) {
     let tokenType = '1';
-    // We give All permissions to demonstrate switching between View and Edit mode and saving report.
     let permissions = models.Permissions.All;
-    // Create the embed configuration object for the report
-    // For more information see https://go.microsoft.com/fwlink/?linkid=2153590
     let config = {
         type: 'report',
         tokenType: tokenType == '0' ? models.TokenType.Aad : models.TokenType.Embed,
@@ -36,41 +33,17 @@ function embedPowerBi(embedUrl, embedReportId, accessToken) {
             }
         }
     };
-
     // Get a reference to the embedded report HTML element
     let embedContainer = $('#embedContainer')[0];
-
     // Embed the report and display it within the div container.
     report = powerbi.embed(embedContainer, config);
-
-    // report.off removes all event handlers for a specific event
-    report.off("loaded");
-
     // report.on will add an event handler
     report.on("loaded", async function () {
         exposeData();
     });
-
-    // report.off removes all event handlers for a specific event
-    report.off("error");
-
-    report.on("error", function (event) {
-        console.log(event.detail);
-    });
-
-    // report.off removes all event handlers for a specific event
-    report.off("rendered");
-
-    // report.on will add an event handler
-    report.on("rendered", function () {
-        renderedResolve();
-        report.off("rendered");
-    });
 }
 
 async function exposeData() {
-    loadedResolve();
-    report.off("loaded");
     pages = await report.getPages();
     let log = "Report pages:";
     let results = [];
@@ -78,12 +51,11 @@ async function exposeData() {
         log += "\n" + pages[i].name + " - " + pages[i].displayName;
         log += "\n" + "Page Visuals:";
         let visuals = await pages[i].getVisuals();
-//        pages[i].visuals = visuals;
         let resultPage = {
-                            "pageId"      : pages[i].name,
-                            "pageName"    : pages[i].displayName,
-                            "pageVisuals" : []
-                        }
+                "pageId"      : pages[i].name,
+                "pageName"    : pages[i].displayName,
+                "pageVisuals" : []
+            }
         for (var j = 0; j< visuals.length; j++) {
             log += "\n" + visuals[j].name + " - " + visuals[j].title;
             let resultPageVisual = {"visualId":visuals[j].name, "visualName":visuals[j].title}
@@ -101,10 +73,7 @@ async function exposeData() {
         results.push(resultPage);
     }
     DebugChannel.postMessage(log);
-    DebugChannel.postMessage("before");
     VisualDataChannel.postMessage(JSON.stringify(results));
-    DebugChannel.postMessage("after");
-
 }
 
 function updatePage(pageId) {
