@@ -75,22 +75,12 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                           border: OutlineInputBorder(),
                         ),
                         onChanged: (String? newValue) {
-                          setState(() {
-                            selectedDate = newValue??'';
-                            _webViewController.evaluateJavascript(
-                                javascriptHandler.getOnVisualsDateChange(
-                                  newValue??'',
-                                  (newValue??'').replaceAll('00:00:00', '23:59:00'),
-                                  selectedPage?.pageId??'',
-                                  selectedPage?.pageVisuals?.where((element) => (element.visualData?.contains('Date Shift\r\n'))??false).toList().first.visualId??''
-                                )
-                            );
-                          });
+                          selectNewDate(newValue);
                         },
                         items: dates.map(
                                 (String date) => DropdownMenuItem<String>(
                                 value: date,
-                                child: Text(date, overflow: TextOverflow.ellipsis,)
+                                child: Text(date.replaceAll('00:00:00', ''), overflow: TextOverflow.ellipsis,)
                             )
                         ).toList()
                     ),
@@ -213,6 +203,23 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
         GDPData('Active Hours', double.parse(activeVsExpected?.split(',').first??'0').toInt())
       ];
       totalWorkers     = getVisualData(visualData: dailyReportVisuals, visualTitle: 'Total Workers\r\n');
+      if(selectedDate.isEmpty) {
+        selectNewDate(dates.first);
+      }
+    });
+  }
+
+  void selectNewDate(String? newValue) {
+    setState(() {
+      selectedDate = newValue??'';
+      _webViewController.evaluateJavascript(
+          javascriptHandler.getOnVisualsDateChange(
+              newValue??'',
+              (newValue??'').replaceAll('00:00:00', '23:59:00'),
+              selectedPage?.pageId??'',
+              selectedPage?.pageVisuals?.where((element) => (element.visualData?.contains('Date Shift\r\n'))??false).toList().first.visualId??''
+          )
+      );
     });
   }
 }
