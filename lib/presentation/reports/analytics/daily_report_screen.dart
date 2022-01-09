@@ -7,12 +7,10 @@ import 'package:bower_bi/js/i_javascript_handler.dart';
 import 'package:bower_bi/js/javascript_handler.dart';
 import 'package:bower_bi/js/local_storage_handler.dart';
 import 'package:bower_bi/js/web_view_service.dart';
-import 'package:bower_bi/utils/custom_multiselect.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 
 class DailyReportScreen extends StatefulWidget {
   const DailyReportScreen({Key? key}) : super(key: key);
@@ -52,95 +50,97 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
   final GlobalKey heightKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
-    print('visual data: ${selectedPage?.pageVisuals![9].visualData}');
     return SafeArea(
       child: Scaffold(
         body: FutureBuilder(
           future: _webViewService.initWebViewUri(),
           builder: (context, snapshot) {
-            return snapshot.hasData ? Column(
+            return snapshot.hasData ? ListView(
               children: [
-                SizedBox(height: 50,),
-                const FlutterLogo(size: 60,),
-                const Text('Wakecap', style: TextStyle(fontSize: 24),),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: DropdownButtonFormField<String>(
-                      value: selectedDate,
-                      isExpanded: true,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedDate = newValue??'';
-                          _webViewController.evaluateJavascript(
-                              javascriptHandler.getOnVisualsDateChange(
-                                newValue??'',
-                                (newValue??'').replaceAll('00:00:00', '23:59:00'),
-                                selectedPage?.pageId??'',
-                                selectedPage?.pageVisuals?.where((element) => (element.visualData?.contains('Date Shift\r\n'))??false).toList().first.visualId??''
-                              )
-                          );
-                          // availableVisuals = selectedPage?.pageVisuals??[];
-                          /*_webViewController.evaluateJavascript(
-                              javascriptHandler.getUpdateVisiblePage(selectedPage?.pageId??'')
-                          );*/
-                        });
-                      },
-                      items: dates.map(
-                              (String date) => DropdownMenuItem<String>(
-                              value: date,
-                              child: Text(date, overflow: TextOverflow.ellipsis,)
-                          )
-                      ).toList()
+                if(selectedPage == null)
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    child: const Center(child: CircularProgressIndicator()),
                   ),
-                ),
-                if(activeVsInactiveData != null) SfCircularChart(
-                  title: ChartTitle(text: 'Active Vs Expected Workers'),
-                  series: <CircularSeries>[
-                    RadialBarSeries<GDPData, String>(
-                      maximumValue: double.parse(activeVsExpected?.split(',')[1]??'0'),
-                      dataLabelSettings: const DataLabelSettings(isVisible: true, angle: 90,),
-                      enableTooltip: true,
-                      dataSource: activeVsInactiveData,
-                      xValueMapper: (data, _) => data.continent,
-                      yValueMapper: (data, _) =>  data.gdp
-                    )
-                  ],
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(activeWorkers??'', style: TextStyle(color: Colors.greenAccent, fontSize: 18),),
-                          Text('Active', style: TextStyle(color: Colors.greenAccent, fontSize: 18)),
-                        ],
-                      ),
+                if(selectedPage != null)
+                ...[
+                  Image.asset('assets/images/wake_cap_icon.png', width: 80, height: 80,),
+                  const Center(child: Text('Wakecap', style: TextStyle(fontSize: 24),)),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: DropdownButtonFormField<String>(
+                        value: selectedDate,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedDate = newValue??'';
+                            _webViewController.evaluateJavascript(
+                                javascriptHandler.getOnVisualsDateChange(
+                                  newValue??'',
+                                  (newValue??'').replaceAll('00:00:00', '23:59:00'),
+                                  selectedPage?.pageId??'',
+                                  selectedPage?.pageVisuals?.where((element) => (element.visualData?.contains('Date Shift\r\n'))??false).toList().first.visualId??''
+                                )
+                            );
+                          });
+                        },
+                        items: dates.map(
+                                (String date) => DropdownMenuItem<String>(
+                                value: date,
+                                child: Text(date, overflow: TextOverflow.ellipsis,)
+                            )
+                        ).toList()
                     ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(inActiveWorkers??'', style: TextStyle(color: Colors.orangeAccent, fontSize: 18)),
-                          Text('Inactive', style: TextStyle(color: Colors.orangeAccent, fontSize: 18)),
-                        ],
+                  ),
+                  if(activeVsInactiveData != null) SfCircularChart(
+                    title: ChartTitle(text: 'Active Vs Expected Workers'),
+                    series: <CircularSeries>[
+                      RadialBarSeries<GDPData, String>(
+                        maximumValue: double.parse(activeVsExpected?.split(',')[1]??'0'),
+                        dataLabelSettings: const DataLabelSettings(isVisible: true, angle: 90,),
+                        enableTooltip: true,
+                        dataSource: activeVsInactiveData,
+                        xValueMapper: (data, _) => data.continent,
+                        yValueMapper: (data, _) =>  data.gdp
+                      )
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(activeWorkers??'', style: const TextStyle(color: Colors.greenAccent, fontSize: 18),),
+                            const Text('Active', style: TextStyle(color: Colors.greenAccent, fontSize: 18)),
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(offLineWorkers??'', style: TextStyle(color: Colors.redAccent, fontSize: 18)),
-                          Text('Offline', style: TextStyle(color: Colors.redAccent, fontSize: 18)),
-                        ],
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(inActiveWorkers??'', style: const TextStyle(color: Colors.orangeAccent, fontSize: 18)),
+                            const Text('Inactive', style: TextStyle(color: Colors.orangeAccent, fontSize: 18)),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Divider(),
-                Text(totalWorkers??'', style: TextStyle(color: Colors.black, fontSize: 22)),
-                Text('Total Workers', style: TextStyle(color: Colors.black, fontSize: 22)),
-                Container(
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(offLineWorkers??'', style: const TextStyle(color: Colors.redAccent, fontSize: 18)),
+                            const Text('Offline', style: TextStyle(color: Colors.redAccent, fontSize: 18)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  Center(child: Text(totalWorkers??'', style: const TextStyle(color: Colors.black, fontSize: 22))),
+                  const Center(child: Text('Total Workers', style: TextStyle(color: Colors.black, fontSize: 22))),
+                ],
+                SizedBox(
                   height: 50,
                   child: Opacity(
                     opacity: 0,
